@@ -4,19 +4,14 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
-  Building2,
   CheckCircle2,
-  Database,
   FileCheck2,
+  FileStack,
   HardDrive,
   Layers,
-  Lock,
   MessageSquare,
-  Network,
-  Scale,
-  ShieldAlert,
   ShieldCheck,
-  Sparkles,
+  UploadCloud,
   Zap,
 } from "lucide-react";
 import { AppHeader } from "@/components/layout/app-header";
@@ -24,12 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Q93DCore } from "@/components/ui/q9-3d-core";
 import { Card3D } from "@/components/ui/card-3d";
 import { Q9InteractiveDemo } from "@/components/corporate/q9-interactive-demo";
-import {
-  EnterpriseComplianceBar,
-  FreeGettingStartedSection,
-  EnterpriseFaqSection,
-  AboutQ9CompanySection,
-} from "@/components/corporate/enterprise-sections";
 
 export default function HomePage() {
   return (
@@ -43,34 +32,30 @@ export default function HomePage() {
       <AppHeader activePath="/" />
 
       <main className="relative z-10 flex-1">
-        {/* ── HERO SECTION: Free Enterprise AI Platform by Q9 ───────────── */}
-        <section className="relative px-4 pt-12 pb-20 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        {/* ── HERO SECTION ────────────────────────────────────────────── */}
+        <section className="relative px-4 pt-12 pb-16 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Narrative Column */}
-            <div className="lg:col-span-7 text-right space-y-7">
+            <div className="lg:col-span-7 text-right space-y-6">
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-muted/40 px-4 py-1.5 text-xs font-bold text-foreground/90 backdrop-blur-md shadow-2xs"
+                className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-muted/40 px-3.5 py-1.5 text-xs font-bold text-foreground/90 backdrop-blur-md shadow-2xs"
               >
                 <span className="size-2 rounded-full bg-cyan-400 animate-pulse" />
-                <span className="tracking-wide">مبادرة تقنية مجانية بالكامل • طورتها شركة Q9 للتقنيات والذكاء الاصطناعي</span>
+                <span>منظومة RAG محلية لاستنطاق المستندات • Q9 Technologies</span>
               </motion.div>
 
               <motion.h1
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.16] sm:leading-[1.18]"
+                className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.18]"
               >
                 استنطاق المستندات{" "}
                 <span className="bg-gradient-to-l from-blue-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">
-                  بالذكاء الاصطناعي السيادي.
-                </span>
-                <br />
-                <span className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground/90">
-                  منظومة معرفية مجانية بالكامل من شركة Q9.
+                  بالذكاء الاصطناعي المحلي
                 </span>
               </motion.h1>
 
@@ -78,12 +63,12 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl font-normal"
+                className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl"
               >
-                طورت **شركة Q9 للتقنيات (Q9 Technologies Inc.)** هذه المنظومة وأتاحتها مجاناً بالكامل لكافة الباحثين، المؤسسات، وفرق العمل. استنطق مئات آلاف العقود والمستندات والتقارير المالية بدقة قطعية موثقة بالصفحة والفقرة — معزولة محلياً 100% داخل جهازك دون أي اشتراكات أو تكاليف.
+                محرك بحث واسترجاع دلالي متقدم لاستخراج المعلومات وتوثيقها بدقة قطعية برقم الصفحة والفقرة، مع معالجة محلية 100% On-Premises تحافظ على خصوصية بياناتك بالكامل.
               </motion.p>
 
-              {/* Free Actions */}
+              {/* Direct Actions */}
               <motion.div
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -93,33 +78,22 @@ export default function HomePage() {
                 <Link href="/chat">
                   <Button
                     size="lg"
-                    className="h-13 px-8 text-sm font-bold rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 hover:from-blue-700 hover:via-indigo-700 hover:to-cyan-700 text-white shadow-xl shadow-blue-500/25 transition-all gap-2 cursor-pointer"
+                    className="h-12 px-7 text-sm font-bold rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 hover:from-blue-700 hover:via-indigo-700 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/20 transition-all gap-2 cursor-pointer"
                   >
                     <MessageSquare className="size-4" />
-                    <span>ابدأ الاستخدام المجاني الآن</span>
+                    <span>ابدأ المحادثة</span>
                     <ArrowLeft className="size-4 mr-1" />
                   </Button>
                 </Link>
 
-                <a href="#demo">
+                <Link href="/documents">
                   <Button
                     size="lg"
                     variant="outline"
-                    className="h-13 px-6 text-sm font-bold rounded-2xl border-border/90 hover:bg-muted text-foreground transition-all gap-2 cursor-pointer"
+                    className="h-12 px-6 text-sm font-bold rounded-xl border-border/80 hover:bg-muted text-foreground transition-all gap-2 cursor-pointer"
                   >
-                    <Sparkles className="size-4 text-cyan-400" />
-                    <span>تجربة الاستنطاق الحي</span>
-                  </Button>
-                </a>
-
-                <Link href="/dashboard">
-                  <Button
-                    size="lg"
-                    variant="ghost"
-                    className="h-13 px-5 text-sm font-bold rounded-2xl text-muted-foreground hover:text-foreground transition-all gap-2 cursor-pointer"
-                  >
-                    <Layers className="size-4 text-primary" />
-                    <span>منصة المستندات</span>
+                    <FileStack className="size-4 text-primary" />
+                    <span>إدارة المستندات</span>
                   </Button>
                 </Link>
               </motion.div>
@@ -129,26 +103,26 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.35 }}
-                className="flex flex-wrap items-center gap-6 text-xs font-semibold text-muted-foreground pt-4 border-t border-border/60"
+                className="flex flex-wrap items-center gap-5 text-xs font-semibold text-muted-foreground pt-4 border-t border-border/60"
               >
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="size-4 text-emerald-500" />
-                  مجاني 100% دون أي رسوم أو قيود
+                  معالجة محلية On-Premises
                 </span>
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="size-4 text-blue-500" />
-                  تشغيل محلي معزول 100% On-Premises
+                  توثيق قطعي برقم الصفحة
                 </span>
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="size-4 text-cyan-500" />
-                  توثيق قطعي برقم الصفحة دون هلوسة
+                  يدعم PDF و Word و TXT
                 </span>
               </motion.div>
             </div>
 
-            {/* Free-Floating Glowing 3D Quantum Entity */}
-            <div className="lg:col-span-5 flex items-center justify-center relative min-h-[460px]">
-              <Q93DCore size={460} className="w-full" />
+            {/* Glowing 3D Quantum Entity */}
+            <div className="lg:col-span-5 flex items-center justify-center relative min-h-[420px]">
+              <Q93DCore size={440} className="w-full" />
             </div>
           </div>
 
@@ -157,60 +131,60 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto"
+            className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto"
           >
             <Card3D>
-              <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-xs text-center transition-colors">
-                <div className="text-3xl font-black text-emerald-500 font-mono">
-                  مجاني 100%
+              <div className="rounded-2xl border border-border/70 bg-card p-5 text-center transition-colors">
+                <div className="text-2xl sm:text-3xl font-black text-emerald-500 font-mono">
+                  100%
                 </div>
                 <p className="mt-1 text-xs font-bold text-foreground">
-                  متاح للجميع بلا مقابل
+                  معالجة محلية
                 </p>
-                <p className="text-[10px] text-muted-foreground font-medium">
-                  مبادرة معرفية مفتوحة من شركة Q9
+                <p className="text-[10px] text-muted-foreground">
+                  بياناتك لا تغادر جهازك
                 </p>
               </div>
             </Card3D>
 
             <Card3D>
-              <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-xs text-center transition-colors">
-                <div className="text-3xl font-black text-foreground font-mono">
-                  100% محلي
+              <div className="rounded-2xl border border-border/70 bg-card p-5 text-center transition-colors">
+                <div className="text-2xl sm:text-3xl font-black text-foreground font-mono">
+                  0%
                 </div>
                 <p className="mt-1 text-xs font-bold text-foreground">
-                  سرية وأمان On-Premises
+                  تكهن أو هلوسة
                 </p>
-                <p className="text-[10px] text-muted-foreground font-medium">
-                  بياناتك لا تغادر جهازك أو خادمك
+                <p className="text-[10px] text-muted-foreground">
+                  إجابات موثقة بالأدلة المرجعية
                 </p>
               </div>
             </Card3D>
 
             <Card3D>
-              <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-xs text-center transition-colors">
-                <div className="text-3xl font-black text-blue-500 font-mono">
-                  0.0%
+              <div className="rounded-2xl border border-border/70 bg-card p-5 text-center transition-colors">
+                <div className="text-2xl sm:text-3xl font-black text-blue-500 font-mono">
+                  0.13s
                 </div>
                 <p className="mt-1 text-xs font-bold text-foreground">
-                  معدل الهلوسة والتكهن
+                  استجابة سريعة
                 </p>
-                <p className="text-[10px] text-muted-foreground font-medium">
-                  كل معلومة مقرونة بنص الدليل الأصلي
+                <p className="text-[10px] text-muted-foreground">
+                  بحث متجهي دلالي فوري
                 </p>
               </div>
             </Card3D>
 
             <Card3D>
-              <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-xs text-center transition-colors">
-                <div className="text-3xl font-black text-cyan-500 font-mono">
-                  0.13 ثانية
+              <div className="rounded-2xl border border-border/70 bg-card p-5 text-center transition-colors">
+                <div className="text-2xl sm:text-3xl font-black text-cyan-500 font-mono">
+                  Multi-Format
                 </div>
                 <p className="mt-1 text-xs font-bold text-foreground">
-                  كاش استجابة فائق
+                  تعدد الصيغ
                 </p>
-                <p className="text-[10px] text-muted-foreground font-medium">
-                  استرجاع دلالي سريع عبر Qdrant
+                <p className="text-[10px] text-muted-foreground">
+                  PDF, DOCX, TXT, MD
                 </p>
               </div>
             </Card3D>
@@ -218,191 +192,164 @@ export default function HomePage() {
         </section>
 
         {/* ── LIVE INTERACTIVE PRODUCT CONSOLE ─────────────────────────── */}
-        <section className="px-4 py-12 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-10 space-y-3">
+        <section id="demo" className="px-4 py-12 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-border/60">
+          <div className="text-center max-w-3xl mx-auto mb-10 space-y-2">
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
-              شاهد محرك Q9 في بيئة العمل الحقيقية
+              تجربة حية لمحرك الاسترجاع الدلالي
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              اختر أحد سيناريوهات المستندات أدناه لمشاهدة الاسترجاع الدلالي، والتوثيق القطعي بالدليل في أجزاء من الثانية.
+              اختر أحد نماذج المستندات أدناه لمشاهدة استخراج الإجابة وتوثيقها بدقة برقم الصفحة.
             </p>
           </div>
 
           <Q9InteractiveDemo />
         </section>
 
-        {/* ── THE THREE CORE PILLARS ──────────────────────────────────── */}
-        <section className="px-4 py-20 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-border/60">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+        {/* ── CORE PILLARS ────────────────────────────────────────────── */}
+        <section className="px-4 py-16 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-border/60">
+          <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-xs font-bold text-primary">
               <Layers className="size-3.5" />
-              <span>المعايير الهندسية لمنظومة Q9</span>
+              <span>المعايير التقنية</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight">
-              تقنية مؤسسية قوية مُقدمة مجاناً للجميع
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
+              بنية قوية لاسترجاع المعرفة
             </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              تجمع منظومة Q9 بين خوارزميات الاسترجاع الدلالي المتقدمة وضوابط الخصوصية التامة.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card3D>
-              <div className="h-full rounded-3xl border border-border/80 bg-card p-8 shadow-xs hover:border-primary/60 transition-all space-y-4">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                  <ShieldCheck className="size-6" />
+              <div className="h-full rounded-2xl border border-border/80 bg-card p-6 shadow-2xs hover:border-primary/60 transition-all space-y-3">
+                <div className="flex size-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                  <ShieldCheck className="size-5" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">
-                  السيادة والعزل التام (Air-Gapped)
+                <h3 className="text-lg font-bold text-foreground">
+                  السيادة والخصوصية التامة
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  تثبيت محلي 100% داخل مراكز بياناتك أو جهازك الخاص. لا يتم إرسال أي بايت أو نص خارج محيطك، مع ضمان قطعي بعدم استخدام ملفاتك لتدريب أي نماذج خارجية.
+                  تشغيل معزول محلياً داخل جهازك أو شبكتك الخاصة دون إرسال أي نصوص أو ملفات إلى خوادم خارجية.
                 </p>
-                <div className="pt-2 border-t border-border/60 text-xs font-bold text-blue-500">
-                  حماية وخصوصية تامة
-                </div>
               </div>
             </Card3D>
 
             <Card3D>
-              <div className="h-full rounded-3xl border border-border/80 bg-card p-8 shadow-xs hover:border-primary/60 transition-all space-y-4">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                  <FileCheck2 className="size-6" />
+              <div className="h-full rounded-2xl border border-border/80 bg-card p-6 shadow-2xs hover:border-primary/60 transition-all space-y-3">
+                <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  <FileCheck2 className="size-5" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">
-                  التوثيق القطعي وسلسلة الأدلة
+                <h3 className="text-lg font-bold text-foreground">
+                  التوثيق الدقيق وسلسلة الأدلة
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  خوارزميات استرجاع دلالية تلزم النظام بتقديم الدليل الموثق برقم الصفحة والفقرة لكل معلومة مستخلصة. إذا لم يرد الدليل صراحة، يعلن المحرك عدم وجوده بدلاً من التكهن.
+                  كل إجابة مستخلصة تكون مقرونة بنص الفقرة الأصلية ورقم الصفحة لمنع الهلوسة وضمان موثوقية المعلومة.
                 </p>
-                <div className="pt-2 border-t border-border/60 text-xs font-bold text-emerald-500">
-                  دقة موثقة بنسبة 100%
-                </div>
               </div>
             </Card3D>
 
             <Card3D>
-              <div className="h-full rounded-3xl border border-border/80 bg-card p-8 shadow-xs hover:border-primary/60 transition-all space-y-4">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
-                  <Zap className="size-6" />
+              <div className="h-full rounded-2xl border border-border/80 bg-card p-6 shadow-2xs hover:border-primary/60 transition-all space-y-3">
+                <div className="flex size-11 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
+                  <Zap className="size-5" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">
-                  سرعة الاستجابة واستيعاب الملفات
+                <h3 className="text-lg font-bold text-foreground">
+                  فهرسة وبحث متجهي سريع
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  استيعاب مرن لمختلف صيغ الملفات (PDF, Word, TXT, MD)، تقسيم حتمي ذكي يحفظ ترابط الأفكار، وبحث متجهي في Qdrant يستوعب آلاف الصفحات بثبات وسرعة فائقة.
+                  تقسيم ذكي للنصوص وحفظ التضمينات المتجهية في Qdrant للوصول إلى أي معلومة في أجزاء من الثانية.
                 </p>
-                <div className="pt-2 border-t border-border/60 text-xs font-bold text-cyan-500">
-                  أداء عالي الكفاءة
-                </div>
               </div>
             </Card3D>
           </div>
         </section>
 
-        {/* ── HOW TO GET STARTED (3 Simple Free Steps) ─────────────────── */}
-        <FreeGettingStartedSection />
-
-        {/* ── PRIVACY & SECURITY GUARANTEES ───────────────────────────── */}
-        <EnterpriseComplianceBar />
-
-        {/* ── PRACTICAL USE CASES (كيف تستفيد مختلف التخصصات مجاناً) ───── */}
-        <section className="px-4 py-20 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-border/60">
-          <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-xs font-bold text-primary">
-              <Building2 className="size-3.5" />
-              <span>مجالات الاستفادة من المنظومة</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight">
-              أداة مثالية للمحامين، المحاسبين، والباحثين
+        {/* ── 3 SIMPLE STEPS ──────────────────────────────────────────── */}
+        <section className="px-4 py-16 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-border/60">
+          <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
+              طريقة الاستخدام
             </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              صممت المنظومة لتخدم مختلف القطاعات وتوفر مئات الساعات من البحث اليدوي في الملفات الكبيرة مجاناً.
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              3 خطوات للبدء في استنطاق مستنداتك
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card3D>
-              <div className="h-full rounded-3xl border border-border/80 bg-card p-7 shadow-xs hover:border-primary/60 transition-all space-y-4">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                  <Scale className="size-6" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="rounded-2xl border border-border/80 bg-card p-6 text-right space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <UploadCloud className="size-5" />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">
-                  للقطاع القانوني وتدقيق العقود
-                </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  فحص مئات صفحات العقود والشروط الجزائية بدقة متناهية، ومقارنة الصياغات القانونية مع التوثيق المرجعي بالصفحة والسطر لحماية المصالح التعاقدية.
-                </p>
-                <div className="pt-2 border-t border-border/60 text-xs font-bold text-primary flex items-center gap-1">
-                  <span>Q9 Legal Intelligence</span>
-                </div>
+                <span className="font-mono text-2xl font-black text-muted-foreground/30">01</span>
               </div>
-            </Card3D>
+              <h3 className="text-base font-bold text-foreground">رفع المستندات</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                ارفع ملفاتك بصيغ PDF أو DOCX أو TXT من واجهة إدارة المستندات.
+              </p>
+            </div>
 
-            <Card3D>
-              <div className="h-full rounded-3xl border border-border/80 bg-card p-7 shadow-xs hover:border-primary/60 transition-all space-y-4">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                  <Database className="size-6" />
+            <div className="rounded-2xl border border-border/80 bg-card p-6 text-right space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <HardDrive className="size-5" />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">
-                  للقوائم المالية والمحاسبة
-                </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  استنطاق الميزانيات السنوية، كشوفات التدقيق المالي، وتتبع المؤشرات المحاسبية فورياً ومحلياً دون رفع أي مستند سرّي على السحابة العامة.
-                </p>
-                <div className="pt-2 border-t border-border/60 text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                  <span>Q9 Finance Core</span>
-                </div>
+                <span className="font-mono text-2xl font-black text-muted-foreground/30">02</span>
               </div>
-            </Card3D>
+              <h3 className="text-base font-bold text-foreground">المعالجة والفهرسة</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                يقوم النظام بتقسيم الملف وتوليد المتجهات الدلالية وتخزينها محلياً.
+              </p>
+            </div>
 
-            <Card3D>
-              <div className="h-full rounded-3xl border border-border/80 bg-card p-7 shadow-xs hover:border-primary/60 transition-all space-y-4">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
-                  <ShieldAlert className="size-6" />
+            <div className="rounded-2xl border border-border/80 bg-card p-6 text-right space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <MessageSquare className="size-5" />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">
-                  للأبحاث والجهات الأكاديمية
-                </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  تلخيص أمهات الكتب، الأبحاث العلمية، والرسائل الأكاديمية واستخراج الاستشهادات النصية الدقيقة مع العزو المصدري برقم الصفحة والفقرة.
-                </p>
-                <div className="pt-2 border-t border-border/60 text-xs font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-1">
-                  <span>Q9 Academic Engine</span>
-                </div>
+                <span className="font-mono text-2xl font-black text-muted-foreground/30">03</span>
               </div>
-            </Card3D>
+              <h3 className="text-base font-bold text-foreground">طرح الأسئلة</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                اطرح استفساراتك واستلم الإجابات موثقة برقم الصفحة والفقرة.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link href="/chat">
+              <Button
+                size="lg"
+                className="h-11 px-7 text-xs font-bold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-md gap-2 cursor-pointer"
+              >
+                <MessageSquare className="size-4" />
+                <span>الدخول إلى المحادثة</span>
+              </Button>
+            </Link>
           </div>
         </section>
-
-        {/* ── FREQUENTLY ASKED QUESTIONS ──────────────────────────────── */}
-        <EnterpriseFaqSection />
-
-        {/* ── ABOUT Q9 TECHNOLOGIES & CONTACT ─────────────────────────── */}
-        <AboutQ9CompanySection />
       </main>
 
-      {/* ── Corporate Footer ─────────────────────────────────────────── */}
-      <footer className="border-t border-border/70 py-12 px-4 sm:px-6 lg:px-8 text-xs text-muted-foreground bg-card/60 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col sm:flex-row items-center gap-3 font-bold text-foreground text-center sm:text-right">
-            <div className="flex size-8 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 text-white font-mono text-sm font-black shadow-md shadow-blue-500/20">
+      {/* ── Minimal Clean Footer ─────────────────────────────────────── */}
+      <footer className="border-t border-border/70 py-8 px-4 sm:px-6 lg:px-8 text-xs text-muted-foreground bg-card/60 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 font-bold text-foreground">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-500 text-white font-mono text-xs font-black">
               Q9
             </div>
-            <div>
-              <p className="text-sm font-black">شركة Q9 للتقنيات والذكاء الاصطناعي (Q9 Technologies Inc.)</p>
-              <p className="text-[11px] text-muted-foreground font-medium">منظومة الاستخبارات المعرفية واستنطاق المستندات • مبادرة مجانية ومتاحة للجميع</p>
-            </div>
+            <span>Q9 AI Studio • منصة استنطاق المستندات</span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] font-semibold">
-            <span className="flex items-center gap-1.5 text-emerald-500">
-              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-              متاح مجاناً 100%
-            </span>
+
+          <div className="flex items-center gap-4 text-xs">
+            <Link href="/chat" className="hover:text-foreground transition-colors">
+              المحادثة
+            </Link>
             <span>•</span>
-            <span className="font-mono text-foreground">contact@q9.ai</span>
+            <Link href="/dashboard" className="hover:text-foreground transition-colors">
+              لوحة القيادة
+            </Link>
             <span>•</span>
-            <span>معالجة محلية معزولة 100% On-Premises</span>
+            <Link href="/documents" className="hover:text-foreground transition-colors">
+              المستندات
+            </Link>
           </div>
         </div>
       </footer>

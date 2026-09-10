@@ -5,15 +5,11 @@ import {
   LayoutDashboard,
   FileStack,
   MessageSquare,
-  Settings,
   Home,
   Menu,
   X,
-  Zap,
   Sun,
   Moon,
-  Building2,
-  Sparkles,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -22,10 +18,9 @@ import { useApp } from "@/lib/context/app-context";
 
 const navItems = [
   { label: "الرئيسية", href: "/", icon: Home },
-  { label: "استوديو المحادثة", href: "/chat", icon: MessageSquare, isLive: true },
+  { label: "المحادثة", href: "/chat", icon: MessageSquare, isLive: true },
   { label: "لوحة القيادة", href: "/dashboard", icon: LayoutDashboard },
   { label: "المستندات", href: "/documents", icon: FileStack },
-  { label: "عن شركة Q9", href: "/#about", icon: Building2 },
 ];
 
 export function AppHeader({ activePath }: { activePath: string }) {
@@ -103,26 +98,14 @@ export function AppHeader({ activePath }: { activePath: string }) {
             )}
           </Button>
 
-          {/* Free Access CTA */}
-          <Link href="/chat" className="hidden xl:block">
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-9 rounded-xl text-xs font-bold border-border/80 hover:bg-muted text-foreground gap-1.5 cursor-pointer"
-            >
-              <Sparkles className="size-3 text-cyan-500" />
-              <span>ابدأ مجاناً</span>
-            </Button>
-          </Link>
-
           {/* Quick Chat Link */}
           <Link href="/chat" className="hidden sm:block">
             <Button
               size="sm"
-              className="h-9 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm gap-1.5"
+              className="h-9 px-4 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm gap-1.5 cursor-pointer"
             >
-              <Zap className="size-3 text-cyan-300" />
-              <span>استجواب سريع</span>
+              <MessageSquare className="size-3.5" />
+              <span>المحادثة</span>
             </Button>
           </Link>
 
