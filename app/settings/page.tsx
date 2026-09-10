@@ -6,10 +6,10 @@ export default function SettingsPage() {
     <AppShell activePath="/settings">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Settings
+          إعدادات المنظومة والبنية التحتية
         </h1>
-        <p className="mt-1 text-muted-foreground">
-          System health and service status
+        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+          مراقبة خدمات الذكاء الاصطناعي، نماذج التضمين، وضبط معلمات الاسترجاع الدلالي (RAG)
         </p>
       </div>
 

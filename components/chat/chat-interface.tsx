@@ -1,21 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
   AlertCircle,
+  ArrowDown,
   Bot,
   Check,
   ChevronRight,
   Copy,
   Download,
   FileText,
+  FileUp,
   Layers,
   Loader2,
   MessageSquare,
   PanelLeftClose,
   PanelLeftOpen,
+  Paperclip,
   Plus,
   RotateCcw,
   Search,
@@ -23,7 +27,9 @@ import {
   Sparkles,
   Square,
   Trash2,
+  UploadCloud,
   User,
+  X,
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -35,11 +41,13 @@ import {
   type ConversationSummary,
 } from "@/lib/api/conversations";
 import { getDocuments } from "@/lib/api/documents";
+import { uploadDocuments } from "@/lib/api/upload";
 import { useApp } from "@/lib/context/app-context";
 import { suggestedQuestions, type ChatMessage, type QuerySource, type Document } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
@@ -53,7 +61,8 @@ function createId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export function ChatInterface() {
+function ChatInterfaceInner() {
+  const searchParams = useSearchParams();
   const { activeCollectionId } = useApp();
 
   // Core Chat State
@@ -74,12 +83,29 @@ export function ChatInterface() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
 
+  // Direct Attachment State
+  const [attaching, setAttaching] = useState(false);
+  const [attachmentProgress, setAttachmentProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Scroll to Bottom Floating Indicator
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+
   // Citation Modal State
   const [activeSource, setActiveSource] = useState<QuerySource | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Read URL query parameter "?doc=ID"
+  useEffect(() => {
+    const docId = searchParams.get("doc");
+    if (docId) {
+      setSelectedDocId(docId);
+    }
+  }, [searchParams]);
 
   // Load conversation history from backend
   const refreshConversations = useCallback(async () => {
@@ -99,10 +125,25 @@ export function ChatInterface() {
       .catch(() => {});
   }, [refreshConversations]);
 
-  // Scroll to bottom when new messages arrive
-  useEffect(() => {
+  // Handle Scroll to toggle Floating Down Button
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    setShowScrollBottom(distanceFromBottom > 180);
+  };
+
+  const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isStreaming]);
+    setShowScrollBottom(false);
+  };
+
+  // Scroll to bottom when streaming starts or new messages arrive
+  useEffect(() => {
+    if (!showScrollBottom) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isStreaming, showScrollBottom]);
 
   // Start a new clean chat session
   const startNewChat = () => {
@@ -118,84 +159,93 @@ export function ChatInterface() {
     if (isStreaming) return;
     setLoadingHistory(true);
     try {
-      const data = await getConversation(convId);
-      setActiveConversationId(data.id);
-      const converted: ChatMessage[] = data.messages.map((m) => ({
-        id: m.id,
-        role: m.role,
-        content: m.content,
-      }));
-      setMessages(converted);
+      const detail = await getConversation(convId);
+      setActiveConversationId(convId);
+      setMessages(detail.messages);
     } catch (err) {
-      toast.error("فشل في تحميل المحادثة");
+      toast.error(err instanceof Error ? err.message : "فشل في تحميل المحادثة");
     } finally {
       setLoadingHistory(false);
     }
   };
 
   // Delete a conversation
-  const handleDeleteChat = async (convId: string, e: React.MouseEvent) => {
+  const handleDeleteChat = async (e: React.MouseEvent, convId: string) => {
     e.stopPropagation();
     try {
       await deleteConversation(convId);
-      setConversations((prev) => prev.filter((c) => c.id !== convId));
+      toast.success("تم حذف المحادثة بنجاح");
       if (activeConversationId === convId) {
         startNewChat();
       }
-      toast.success("تم حذف المحادثة بنجاح");
-    } catch {
-      toast.error("حدث خطأ أثناء حذف المحادثة");
+      refreshConversations();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "فشل في حذف المحادثة");
     }
   };
 
-  // Copy message text
+  // Stop generation
+  const stopGeneration = () => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+    setIsStreaming(false);
+    toast.info("تم إيقاف التوليد");
+  };
+
+  // Copy text to clipboard
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
-    toast.success("تم النسخ إلى الحافظة");
+    toast.success("تم نسخ النص إلى الحافظة");
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  // Export current conversation to Markdown
-  const exportChat = () => {
-    if (messages.length === 0) {
-      toast.error("لا توجد رسائل لتصديرها");
-      return;
-    }
+  // Direct Attachment Handler
+  const handleAttachFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    setAttaching(true);
+    setAttachmentProgress(0);
 
-    const dateStr = new Date().toLocaleString("ar-EG");
-    let markdown = `# تقرير محادثة Q9 AI Studio\n\n`;
-    markdown += `- **تاريخ التصدير:** ${dateStr}\n`;
-    markdown += `- **معرف الجلسة:** ${activeConversationId ?? "جلسة جديدة"}\n\n`;
-    markdown += `---\n\n`;
+    try {
+      const results = await uploadDocuments([file], {
+        collectionId: activeCollectionId,
+        onProgress: ({ progress }) => setAttachmentProgress(progress),
+      });
 
-    messages.forEach((msg) => {
-      const roleLabel = msg.role === "user" ? "👤 السؤال (المستخدم)" : "🤖 إجابة Q9 AI";
-      markdown += `### ${roleLabel}\n\n${msg.content}\n\n`;
-      if (msg.sources && msg.sources.length > 0) {
-        markdown += `**المصادر المستند إليها:**\n`;
-        msg.sources.forEach((s) => {
-          markdown += `- 📄 ${s.documentName ?? "مستند"} (صفحة ${s.page ?? "-"}) - مطابقة: ${Math.round((s.score ?? 0) * 100)}%\n`;
-          if (s.chunkText) {
-            markdown += `  > ${s.chunkText.replace(/\n/g, " ")}\n`;
-          }
-        });
-        markdown += `\n`;
+      if (results[0]) {
+        setSelectedDocId(results[0].id);
+        toast.success(`تم إرفاق وفهرسة "${file.name}" وتعيينها كنطاق بحث`);
+        const docsRes = await getDocuments();
+        setDocuments(docsRes.documents);
       }
-      markdown += `---\n\n`;
-    });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "فشل في إرفاق المستند");
+    } finally {
+      setAttaching(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
-    const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8;" });
+  // Export chat transcript
+  const exportChat = () => {
+    if (messages.length === 0) return;
+    const content = messages
+      .map((m) => `### ${m.role === "user" ? "السؤال" : "الإجابة"}:\n${m.content}\n`)
+      .join("\n---\n\n");
+    const blob = new Blob([content], { type: "text/markdown;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `Q9-AI-Chat-${new Date().toISOString().slice(0, 10)}.md`;
+    link.download = `Q9_Chat_Export_${new Date().toISOString().slice(0, 10)}.md`;
     link.click();
     URL.revokeObjectURL(url);
-    toast.success("تم تحميل ملف تقرير المحادثة بتنسيق Markdown");
+    toast.success("تم تصدير نص المحادثة بصيغة Markdown");
   };
 
-  // Main query sender
+  // Send query via SSE
   const sendQuery = useCallback(
     async (queryText: string, retry = false) => {
       const text = queryText.trim();
@@ -298,142 +348,130 @@ export function ChatInterface() {
     [activeCollectionId, activeConversationId, isStreaming, refreshConversations]
   );
 
-  const stopGeneration = () => {
-    abortRef.current?.abort();
-    setIsStreaming(false);
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg.isStreaming ? { ...msg, isStreaming: false } : msg
-      )
-    );
-  };
-
   const filteredConversations = conversations.filter((c) =>
-    c.title.toLowerCase().includes(historySearch.toLowerCase())
+    (c.title || "محادثة").toLowerCase().includes(historySearch.toLowerCase())
   );
 
-  return (
-    <div className="relative flex h-full w-full overflow-hidden bg-background">
-      {/* Mobile Backdrop Overlay */}
-      {isSidebarOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-15"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+  const selectedDoc = documents.find((d) => d.id === selectedDocId);
 
-      {/* ── Left/Start Sidebar (ChatGPT / Claude Style) ────────────────────────── */}
+  return (
+    <div className="flex h-[calc(100vh-4rem)] w-full overflow-hidden bg-background">
+      {/* ── Collapsible History & Scope Sidebar ────────────────────────── */}
       <aside
         className={cn(
-          "flex flex-col border-r border-border/60 bg-muted/20 transition-all duration-300 ease-in-out shrink-0 z-20",
-          isSidebarOpen ? "w-80" : "w-0 overflow-hidden border-none",
-          "max-md:fixed max-md:top-16 max-md:bottom-0 max-md:right-0 max-md:w-80 max-md:bg-background/95 max-md:backdrop-blur-2xl max-md:shadow-2xl"
+          "border-l border-border/70 bg-card/60 backdrop-blur-md flex flex-col transition-all duration-300 z-20 shrink-0",
+          isSidebarOpen ? "w-80" : "w-0 overflow-hidden border-none"
         )}
       >
-        {/* Sidebar Header & New Chat */}
-        <div className="p-4 border-b border-border/60 space-y-3">
+        {/* Sidebar Header */}
+        <div className="p-3 border-b border-border/60 flex items-center justify-between gap-2">
           <Button
+            size="sm"
             onClick={startNewChat}
-            className="w-full justify-start gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm font-medium h-10"
+            className="flex-1 text-xs font-bold gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xs rounded-xl"
           >
             <Plus className="size-4" />
             <span>محادثة جديدة</span>
           </Button>
 
-          {/* Search History */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 text-muted-foreground hover:text-foreground"
+            onClick={() => setIsSidebarOpen(false)}
+            title="طي القائمة الجانبية"
+          >
+            <PanelLeftClose className="size-4" />
+          </Button>
+        </div>
+
+        {/* History Search Bar */}
+        <div className="p-3 border-b border-border/40">
           <div className="relative">
-            <Search className="absolute right-3 top-2.5 size-4 text-muted-foreground" />
+            <Search className="absolute right-2.5 top-2.5 size-3.5 text-muted-foreground" />
             <Input
               value={historySearch}
               onChange={(e) => setHistorySearch(e.target.value)}
-              placeholder="بحث في المحادثات..."
-              className="pr-9 h-9 text-xs bg-background/60 border-border/80"
+              placeholder="بحث في سجل المحادثات..."
+              className="h-8 pr-8 text-xs bg-background/50 rounded-lg"
             />
           </div>
         </div>
 
-        {/* Conversation List */}
+        {/* Conversation History List */}
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          <div className="px-2 py-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-            سجل المحادثات
-          </div>
-          {filteredConversations.length === 0 ? (
-            <div className="py-8 text-center text-xs text-muted-foreground">
-              لا توجد محادثات سابقة
+          {loadingHistory ? (
+            <div className="flex items-center justify-center p-6 text-muted-foreground">
+              <Loader2 className="size-5 animate-spin" />
+            </div>
+          ) : filteredConversations.length === 0 ? (
+            <div className="p-6 text-center text-xs text-muted-foreground">
+              {historySearch ? "لا توجد نتائج مطابقة" : "لا توجد محادثات سابقة"}
             </div>
           ) : (
             filteredConversations.map((conv) => {
-              const isActive = conv.id === activeConversationId;
+              const isActive = activeConversationId === conv.id;
               return (
                 <div
                   key={conv.id}
                   onClick={() => loadChat(conv.id)}
                   className={cn(
-                    "group relative flex items-center justify-between rounded-lg px-3 py-2.5 text-xs transition-colors cursor-pointer",
+                    "group flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer transition-colors text-right",
                     isActive
-                      ? "bg-primary/10 text-primary font-medium border border-primary/20"
-                      : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                      ? "bg-primary/10 text-primary font-bold shadow-2xs border border-primary/20"
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                   )}
                 >
-                  <div className="flex items-center gap-2 overflow-hidden flex-1">
-                    <MessageSquare className="size-3.5 shrink-0 opacity-70" />
-                    <span className="truncate text-right" title={conv.title}>
-                      {conv.title}
-                    </span>
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <MessageSquare className="size-3.5 shrink-0" />
+                    <span className="truncate">{conv.title || "محادثة استرجاع معرفي"}</span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-6 opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-opacity shrink-0 mr-1"
-                    onClick={(e) => handleDeleteChat(conv.id, e)}
+
+                  <button
+                    onClick={(e) => handleDeleteChat(e, conv.id)}
+                    className="opacity-0 group-hover:opacity-100 size-6 flex items-center justify-center rounded-md hover:bg-destructive/15 text-muted-foreground hover:text-destructive transition-all"
+                    title="حذف المحادثة"
                   >
                     <Trash2 className="size-3" />
-                  </Button>
+                  </button>
                 </div>
               );
             })
           )}
         </div>
 
-        {/* Knowledge Base Scope & Status Footer */}
-        <div className="p-3 border-t border-border/60 bg-muted/40 space-y-2.5">
-          <div className="space-y-1">
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-              <span className="flex items-center gap-1 font-medium">
-                <Layers className="size-3 text-primary" /> نطاق المعرفة:
-              </span>
-              <span className="text-[10px] text-primary font-bold">
-                {documents.length} مستند مفهرس
-              </span>
-            </div>
-            <select
-              value={selectedDocId ?? ""}
-              onChange={(e) => setSelectedDocId(e.target.value || null)}
-              className="w-full text-xs rounded-md border border-border/80 bg-background px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="">جميع المستندات (قاعدة المعرفة كاملة)</option>
-              {documents.map((doc) => (
-                <option key={doc.id} value={doc.id}>
-                  📄 {doc.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Knowledge Scope / Active Document Filter */}
+        <div className="p-3 border-t border-border/60 bg-muted/20 space-y-2">
+          <label className="text-[11px] font-bold text-foreground block">
+            نطاق الاستجواب والمستندات:
+          </label>
+          <select
+            value={selectedDocId ?? ""}
+            onChange={(e) => setSelectedDocId(e.target.value || null)}
+            className="w-full text-xs rounded-xl border border-border/80 bg-background px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="">جميع المستندات (قاعدة المعرفة كاملة)</option>
+            {documents.map((doc) => (
+              <option key={doc.id} value={doc.id}>
+                📄 {doc.name}
+              </option>
+            ))}
+          </select>
 
-          <div className="rounded-md border border-border/60 bg-background/50 p-2 text-[11px] space-y-1">
+          <div className="rounded-xl border border-border/60 bg-background/50 p-2 text-[11px] space-y-1">
             <div className="flex items-center justify-between text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 المحرك العصبي
               </span>
-              <span className="font-mono text-[10px] text-foreground font-semibold">Qwen 3.5 4B</span>
+              <span className="font-mono text-[10px] text-foreground font-semibold">Qwen 2.5 (LM Studio)</span>
             </div>
             <div className="flex items-center justify-between text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <Zap className="size-3 text-amber-500" />
-                الذاكرة المخبأة (Cache)
+                محرك البحث
               </span>
-              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">فائقة 0.02s</span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Qdrant Vector DB</span>
             </div>
           </div>
         </div>
@@ -474,7 +512,7 @@ export function ChatInterface() {
                   variant="outline"
                   size="sm"
                   onClick={exportChat}
-                  className="h-8 text-xs gap-1.5 border-border/80 hover:bg-muted"
+                  className="h-8 text-xs gap-1.5 border-border/80 hover:bg-muted rounded-xl"
                 >
                   <Download className="size-3.5" />
                   <span className="hidden sm:inline">تصدير المحادثة</span>
@@ -483,7 +521,7 @@ export function ChatInterface() {
                   variant="ghost"
                   size="sm"
                   onClick={startNewChat}
-                  className="h-8 text-xs text-muted-foreground hover:text-foreground"
+                  className="h-8 text-xs text-muted-foreground hover:text-foreground rounded-xl"
                 >
                   مسح
                 </Button>
@@ -493,42 +531,64 @@ export function ChatInterface() {
         </div>
 
         {/* Message Feed Area */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 md:px-8 space-y-6">
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 md:px-8 space-y-6 relative"
+        >
           {messages.length === 0 ? (
-            /* Welcome Hero & Suggestions */
+            /* Welcome Hero & Smart Suggestions */
             <div className="flex min-h-full flex-col items-center justify-center max-w-2xl mx-auto text-center px-4 py-12 animate-in fade-in duration-500">
-              <div className="size-16 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 p-[1px] shadow-lg shadow-indigo-500/20 mb-6">
+              <div className="size-16 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 p-[1px] shadow-lg shadow-blue-500/20 mb-6">
                 <div className="flex h-full w-full items-center justify-center rounded-2xl bg-background">
-                  <Sparkles className="size-8 text-indigo-600 dark:text-indigo-400 animate-pulse" />
+                  <Sparkles className="size-8 text-primary animate-pulse" />
                 </div>
               </div>
 
               <h2 className="text-2xl font-black tracking-tight sm:text-3xl bg-gradient-to-r from-foreground via-foreground/90 to-primary bg-clip-text text-transparent">
-                مساعد المعرفة الذكي | Q9 AI Studio
+                استوديو استنطاق المستندات الذكي
               </h2>
               <p className="mt-2 text-sm text-muted-foreground max-w-md leading-relaxed">
-                استنطاق فوري فائق السرعة عبر الذكاء الاصطناعي وقاعدة المتجهات، مع توثيق دقيق لكل فقرة ومصدر بالصفحة.
+                اطرح أي استفسار حول مستنداتك لتستلم إجابات موثقة بدقة قطعية بالصفحة والفقرة الأصلية.
               </p>
 
-              {/* Suggestions Grid */}
-              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-right">
-                {suggestedQuestions.map((q) => (
-                  <button
-                    key={q}
-                    onClick={() => sendQuery(q)}
-                    disabled={isStreaming}
-                    className="flex flex-col justify-between p-3.5 rounded-xl border border-border/70 bg-card hover:bg-muted/50 hover:border-primary/50 transition-all text-right group shadow-xs hover:shadow-sm"
+              {/* Suggestions or Upload Prompt */}
+              {documents.length === 0 ? (
+                <div className="mt-8 p-6 rounded-2xl border border-dashed border-primary/40 bg-card/60 max-w-md text-center space-y-3">
+                  <UploadCloud className="size-8 text-primary mx-auto" />
+                  <p className="text-xs font-bold text-foreground">قاعدة المعرفة فارغة حالياً</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    قم بإرفاق أو رفع مستند أولاً لتتمكن من استنطاقه والبحث فيه.
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-8 text-xs font-bold gap-1.5 rounded-xl"
                   >
-                    <span className="text-xs font-medium text-foreground group-hover:text-primary transition-colors leading-relaxed">
-                      {q}
-                    </span>
-                    <div className="mt-2 flex items-center justify-end gap-1 text-[11px] text-muted-foreground opacity-60 group-hover:opacity-100">
-                      <span>إرسال فوري</span>
-                      <ChevronRight className="size-3 rotate-180" />
-                    </div>
-                  </button>
-                ))}
-              </div>
+                    <Paperclip className="size-3.5" />
+                    <span>إرفاق مستند الآن</span>
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-right">
+                  {suggestedQuestions.map((q) => (
+                    <button
+                      key={q}
+                      onClick={() => sendQuery(q)}
+                      disabled={isStreaming}
+                      className="flex flex-col justify-between p-3.5 rounded-xl border border-border/70 bg-card hover:bg-muted/50 hover:border-primary/50 transition-all text-right group shadow-xs hover:shadow-sm cursor-pointer"
+                    >
+                      <span className="text-xs font-medium text-foreground group-hover:text-primary transition-colors leading-relaxed">
+                        {q}
+                      </span>
+                      <div className="mt-2 flex items-center justify-end gap-1 text-[11px] text-muted-foreground opacity-60 group-hover:opacity-100">
+                        <span>إرسال فوري</span>
+                        <ChevronRight className="size-3 rotate-180" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             /* Message Thread */
@@ -570,11 +630,11 @@ export function ChatInterface() {
                         {/* Message Actions */}
                         {!message.isStreaming && message.content && (
                           <div className="flex items-center justify-between border-t border-border/40 pt-2 mt-3 text-xs text-muted-foreground">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-7 px-2 text-xs gap-1 hover:text-foreground"
+                                className="h-7 px-2 text-xs gap-1 hover:text-foreground rounded-lg"
                                 onClick={() => copyToClipboard(message.content, message.id)}
                               >
                                 {copiedId === message.id ? (
@@ -589,6 +649,19 @@ export function ChatInterface() {
                                   </>
                                 )}
                               </Button>
+
+                              {lastQuery && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-2 text-xs gap-1 hover:text-foreground rounded-lg"
+                                  onClick={() => sendQuery(lastQuery, true)}
+                                  title="إعادة صياغة الإجابة"
+                                >
+                                  <RotateCcw className="size-3" />
+                                  <span>إعادة المحاولة</span>
+                                </Button>
+                              )}
                             </div>
                             <span className="text-[10px] opacity-70">
                               {message.content.length} حرف
@@ -602,7 +675,7 @@ export function ChatInterface() {
 
                     {/* Error Box */}
                     {message.error && (
-                      <div className="mt-3 flex items-center gap-2 rounded-lg bg-destructive/10 p-2.5 text-xs text-destructive">
+                      <div className="mt-3 flex items-center gap-2 rounded-xl bg-destructive/10 p-3 text-xs text-destructive border border-destructive/20">
                         <AlertCircle className="size-4 shrink-0" />
                         <span>{message.error}</span>
                         {lastQuery && !message.isStreaming && (
@@ -634,14 +707,14 @@ export function ChatInterface() {
                             <button
                               key={i}
                               onClick={() => setActiveSource(source)}
-                              className="flex items-center gap-1.5 rounded-lg border border-border/80 bg-background/80 px-2.5 py-1.5 text-xs font-medium hover:border-primary/60 hover:bg-primary/5 transition-all shadow-2xs group text-right"
+                              className="flex items-center gap-1.5 rounded-xl border border-border/80 bg-background/80 px-2.5 py-1.5 text-xs font-medium hover:border-primary/60 hover:bg-primary/5 transition-all shadow-2xs group text-right cursor-pointer"
                             >
                               <span className="text-muted-foreground group-hover:text-primary">📄</span>
                               <span className="truncate max-w-[160px] text-foreground">
                                 {source.documentName ?? "مستند"}
                               </span>
                               {source.page && (
-                                <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                                <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                                   ص {source.page}
                                 </span>
                               )}
@@ -667,11 +740,62 @@ export function ChatInterface() {
               <div ref={bottomRef} />
             </div>
           )}
+
+          {/* Floating Scroll to Bottom Button */}
+          {showScrollBottom && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={scrollToBottom}
+              className="fixed bottom-28 left-1/2 -translate-x-1/2 z-30 shadow-lg border-primary/40 bg-background/95 backdrop-blur-md text-xs gap-1.5 rounded-full px-4"
+            >
+              <ArrowDown className="size-3.5 text-primary" />
+              <span>النزول للأسفل</span>
+            </Button>
+          )}
         </div>
 
         {/* Bottom Floating Input Dock */}
-        <div className="p-4 bg-gradient-to-t from-background via-background to-transparent pt-6">
+        <div className="p-4 bg-gradient-to-t from-background via-background to-transparent pt-4">
           <div className="max-w-3xl mx-auto">
+            {/* Hidden Attachment Input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.docx,.pptx,.xlsx,.csv,.txt,.md,.json"
+              className="hidden"
+              onChange={handleAttachFile}
+            />
+
+            {/* Active Document Scope Banner */}
+            {selectedDoc && (
+              <div className="flex items-center justify-between px-3.5 py-1.5 mb-2 rounded-xl bg-primary/10 border border-primary/20 text-xs animate-in fade-in">
+                <span className="flex items-center gap-1.5 text-primary font-semibold truncate">
+                  <FileText className="size-3.5 shrink-0" />
+                  <span>نطاق الاستجواب محصور على:</span>
+                  <span className="font-bold text-foreground truncate max-w-xs">{selectedDoc.name}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDocId(null)}
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground mr-2 cursor-pointer font-medium"
+                  title="إلغاء الحصر والبحث في كافة المستندات"
+                >
+                  <span>إلغاء الحصر</span>
+                  <X className="size-3" />
+                </button>
+              </div>
+            )}
+
+            {/* Attaching Progress Pill */}
+            {attaching && (
+              <div className="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-xl bg-muted border border-border text-xs">
+                <Loader2 className="size-3.5 animate-spin text-primary" />
+                <span className="text-muted-foreground">جاري فهرسة المستند المرفق...</span>
+                <span className="font-mono text-primary font-bold mr-auto">{attachmentProgress}%</span>
+              </div>
+            )}
+
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -679,12 +803,29 @@ export function ChatInterface() {
               }}
               className="relative flex items-center rounded-2xl border border-border/80 bg-background/90 backdrop-blur-xl shadow-md focus-within:border-primary/70 focus-within:ring-2 focus-within:ring-primary/20 transition-all p-2"
             >
+              {/* Attachment Button */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                disabled={attaching || isStreaming}
+                onClick={() => fileInputRef.current?.click()}
+                className="size-9 rounded-xl text-muted-foreground hover:text-foreground shrink-0 cursor-pointer"
+                title="إرفاق مستند جديد للاستجواب الفوري"
+              >
+                {attaching ? (
+                  <Loader2 className="size-4 animate-spin text-primary" />
+                ) : (
+                  <Paperclip className="size-4" />
+                )}
+              </Button>
+
               <Textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="اسأل أي سؤال حول مستنداتك... (Enter للإرسال)"
-                className="min-h-[44px] max-h-32 border-0 bg-transparent focus-visible:ring-0 resize-none py-2.5 px-3 text-sm"
+                className="min-h-[44px] max-h-32 border-0 bg-transparent focus-visible:ring-0 resize-none py-2.5 px-3 text-sm flex-1"
                 rows={1}
                 disabled={isStreaming}
                 onKeyDown={(e) => {
@@ -695,14 +836,14 @@ export function ChatInterface() {
                 }}
               />
 
-              <div className="flex items-center gap-1.5 pl-1">
+              <div className="flex items-center gap-1.5 pl-1 shrink-0">
                 {isStreaming ? (
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
                     onClick={stopGeneration}
-                    className="size-9 rounded-xl border-destructive/40 text-destructive hover:bg-destructive/10"
+                    className="size-9 rounded-xl border-destructive/40 text-destructive hover:bg-destructive/10 cursor-pointer"
                     title="إيقاف التوليد"
                   >
                     <Square className="size-4" />
@@ -712,8 +853,8 @@ export function ChatInterface() {
                     type="submit"
                     size="icon"
                     disabled={!input.trim()}
-                    className="size-9 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm"
-                    title="إرسال"
+                    className="size-9 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm cursor-pointer"
+                    title="إرسال السؤال"
                   >
                     <Send className="size-4" />
                   </Button>
@@ -747,7 +888,7 @@ export function ChatInterface() {
 
           {activeSource && (
             <div className="space-y-4 my-2 flex-1 overflow-y-auto">
-              <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg bg-muted/50 border border-border/60 text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-muted/50 border border-border/60 text-xs">
                 <div>
                   <span className="text-muted-foreground">اسم المستند: </span>
                   <span className="font-semibold text-foreground">
@@ -756,7 +897,7 @@ export function ChatInterface() {
                 </div>
                 <div className="flex items-center gap-3">
                   {activeSource.page && (
-                    <span className="bg-background px-2 py-0.5 rounded border border-border/80 font-medium">
+                    <span className="bg-background px-2 py-0.5 rounded-lg border border-border/80 font-medium">
                       رقم الصفحة: {activeSource.page}
                     </span>
                   )}
@@ -776,7 +917,7 @@ export function ChatInterface() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs"
+                  className="text-xs rounded-xl"
                   onClick={() => {
                     if (activeSource.chunkText) {
                       navigator.clipboard.writeText(activeSource.chunkText);
@@ -789,7 +930,7 @@ export function ChatInterface() {
                 </Button>
                 <Button
                   size="sm"
-                  className="text-xs"
+                  className="text-xs rounded-xl"
                   onClick={() => setActiveSource(null)}
                 >
                   إغلاق
@@ -800,5 +941,13 @@ export function ChatInterface() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export function ChatInterface() {
+  return (
+    <Suspense fallback={<div className="flex h-full w-full items-center justify-center"><Loader2 className="size-6 animate-spin text-primary" /></div>}>
+      <ChatInterfaceInner />
+    </Suspense>
   );
 }

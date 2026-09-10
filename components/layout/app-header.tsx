@@ -6,6 +6,7 @@ import {
   FileStack,
   MessageSquare,
   Home,
+  Settings,
   Menu,
   X,
   Sun,
@@ -19,8 +20,9 @@ import { useApp } from "@/lib/context/app-context";
 const navItems = [
   { label: "الرئيسية", href: "/", icon: Home },
   { label: "المحادثة", href: "/chat", icon: MessageSquare, isLive: true },
-  { label: "لوحة القيادة", href: "/dashboard", icon: LayoutDashboard },
   { label: "المستندات", href: "/documents", icon: FileStack },
+  { label: "لوحة القيادة", href: "/dashboard", icon: LayoutDashboard },
+  { label: "الإعدادات", href: "/settings", icon: Settings },
 ];
 
 export function AppHeader({ activePath }: { activePath: string }) {
@@ -97,6 +99,21 @@ export function AppHeader({ activePath }: { activePath: string }) {
               <Moon className="size-4 text-indigo-600 hover:-rotate-12 transition-transform duration-300" />
             )}
           </Button>
+
+          {/* Settings Link */}
+          <Link href="/settings">
+            <Button
+              variant="outline"
+              size="icon"
+              className={cn(
+                "size-9 rounded-xl border-border/80 text-foreground hover:border-primary/50 transition-all cursor-pointer",
+                activePath === "/settings" && "bg-primary/10 border-primary/40 text-primary"
+              )}
+              title="الإعدادات وضبط المنظومة"
+            >
+              <Settings className="size-4 text-muted-foreground hover:text-foreground transition-colors" />
+            </Button>
+          </Link>
 
           {/* Quick Chat Link */}
           <Link href="/chat" className="hidden sm:block">
