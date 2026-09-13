@@ -172,14 +172,13 @@ export function CollectionsManager() {
                 <Card
                   className={cn(
                     "relative overflow-hidden transition-colors",
-                    isActive && "border-primary/50 ring-1 ring-primary/20"
+                    isActive && "border-neutral-500 ring-1 ring-neutral-500"
                   )}
                 >
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 to-violet-500/5" />
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <div className="flex size-9 items-center justify-center rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-200">
                           <FolderOpen className="size-4" />
                         </div>
                         <div>

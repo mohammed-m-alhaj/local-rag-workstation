@@ -79,7 +79,7 @@ export function RecentDocuments({
             <Button
               variant="ghost"
               size="sm"
-              className="text-xs text-primary gap-1"
+              className="text-xs text-neutral-300 hover:text-white gap-1"
               asChild
             >
               <Link href="/documents">
@@ -126,8 +126,8 @@ export function RecentDocuments({
                     className="flex items-center justify-between gap-4 px-6 py-3.5 transition-colors hover:bg-muted/40"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted border border-border/60 text-muted-foreground">
-                        <Icon className="size-4 text-primary" />
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
+                        <Icon className="size-4" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-bold text-foreground" title={doc.name}>
@@ -138,7 +138,7 @@ export function RecentDocuments({
                           <span>•</span>
                           <span>{formatBytes(doc.size)}</span>
                           <span>•</span>
-                          <span className="text-primary font-medium">{doc.chunks} مقطع معرفي</span>
+                          <span className="text-neutral-300 font-mono">{doc.chunks} chunks</span>
                         </div>
                       </div>
                     </div>
@@ -157,7 +157,7 @@ export function RecentDocuments({
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-8 text-xs gap-1 hover:border-primary/50 hover:bg-primary/10 hover:text-primary transition-colors"
+                          className="h-8 text-xs gap-1 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900 text-neutral-200 transition-colors"
                         >
                           <MessageSquare className="size-3.5" />
                           <span className="hidden sm:inline">استجواب</span>

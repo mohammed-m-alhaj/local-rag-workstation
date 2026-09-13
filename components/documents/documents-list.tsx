@@ -218,11 +218,11 @@ export function DocumentsList() {
             className={cn(
               "flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer",
               activeTab === "documents"
-                ? "bg-background text-foreground shadow-2xs"
+                ? "bg-neutral-900 text-white border border-neutral-800 shadow-2xs"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <FileText className="size-3.5 text-primary" />
+            <FileText className="size-3.5 text-neutral-300" />
             <span>المستندات المفهرسة ({documents.length})</span>
           </button>
           <button
@@ -230,11 +230,11 @@ export function DocumentsList() {
             className={cn(
               "flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer",
               activeTab === "collections"
-                ? "bg-background text-foreground shadow-2xs"
+                ? "bg-neutral-900 text-white border border-neutral-800 shadow-2xs"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <FolderOpen className="size-3.5 text-amber-500" />
+            <FolderOpen className="size-3.5 text-neutral-300" />
             <span>المجموعات والمجلدات ({collections.length})</span>
           </button>
         </div>
@@ -246,7 +246,7 @@ export function DocumentsList() {
             size="sm"
             onClick={() => refetch()}
             disabled={loading}
-            className="h-9 px-3 text-xs gap-1.5 border-border/80 hover:bg-muted"
+            className="h-9 px-3 text-xs gap-1.5 border-neutral-800 hover:bg-neutral-900 text-neutral-200"
             title="تحديث قائمة المستندات"
           >
             <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
@@ -257,7 +257,7 @@ export function DocumentsList() {
             <Button
               size="sm"
               onClick={() => setShowUpload((prev) => !prev)}
-              className="h-9 px-4 text-xs font-bold gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm cursor-pointer"
+              className="h-9 px-4 text-xs font-semibold gap-2 bg-white text-black hover:bg-neutral-200 rounded-lg shadow-none cursor-pointer"
             >
               <UploadCloud className="size-4" />
               <span>{showUpload ? "إغلاق نافذة الرفع" : "رفع مستند جديد"}</span>
@@ -266,7 +266,7 @@ export function DocumentsList() {
             <Button
               size="sm"
               onClick={() => setShowCreateCollection(true)}
-              className="h-9 px-4 text-xs font-bold gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm cursor-pointer"
+              className="h-9 px-4 text-xs font-bold gap-2 bg-white text-black hover:bg-neutral-200 rounded-lg shadow-sm cursor-pointer"
             >
               <FolderPlus className="size-4" />
               <span>إنشاء مجموعة جديدة</span>
@@ -285,7 +285,7 @@ export function DocumentsList() {
             transition={{ duration: 0.25 }}
             className="overflow-hidden"
           >
-            <Card className="border-2 border-dashed border-primary/40 bg-card/60 backdrop-blur-sm p-6 text-center transition-all">
+            <Card className="border-2 border-dashed border-neutral-700 bg-neutral-950 p-6 text-center transition-all">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -314,12 +314,12 @@ export function DocumentsList() {
                 }}
                 className={cn(
                   "py-8 px-4 rounded-xl transition-all flex flex-col items-center justify-center space-y-3",
-                  isDragging ? "bg-primary/10 scale-[1.01]" : "hover:bg-muted/30"
+                  isDragging ? "bg-neutral-900 scale-[1.01]" : "hover:bg-neutral-900/50"
                 )}
               >
-                <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-inner">
+                <div className="flex size-14 items-center justify-center rounded-xl bg-neutral-900 border border-neutral-800 text-white shadow-inner">
                   {uploading ? (
-                    <Loader2 className="size-7 animate-spin" />
+                    <Loader2 className="size-7 animate-spin text-white" />
                   ) : (
                     <UploadCloud className="size-7" />
                   )}
@@ -382,7 +382,7 @@ export function DocumentsList() {
                     className={cn(
                       "px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer",
                       typeFilter === tab.id
-                        ? "bg-primary text-primary-foreground shadow-2xs"
+                        ? "bg-neutral-900 text-white border border-neutral-700 shadow-2xs"
                         : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
@@ -391,11 +391,12 @@ export function DocumentsList() {
                 ))}
 
                 {activeCollectionId && (
-                  <div className="flex items-center gap-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-lg text-xs font-semibold mr-2">
-                    <span>مجموعة نشطة: {collections.find((c) => c.id === activeCollectionId)?.name}</span>
+                  <div className="flex items-center gap-1.5 bg-muted text-foreground border border-border px-2.5 py-0.5 rounded text-xs font-mono mr-2">
+                    <span>مجموعة: {collections.find((c) => c.id === activeCollectionId)?.name}</span>
                     <button
                       onClick={() => setActiveCollectionId(null)}
-                      className="size-4 flex items-center justify-center hover:opacity-75"
+                      className="size-3.5 flex items-center justify-center hover:opacity-75 cursor-pointer"
+                      title="إلغاء التصفية"
                     >
                       <X className="size-3" />
                     </button>
@@ -475,8 +476,8 @@ export function DocumentsList() {
                       className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-muted/40"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted border border-border/60 text-muted-foreground">
-                          <Icon className="size-5 text-primary" />
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
+                          <Icon className="size-5" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-bold text-foreground" title={doc.name}>
@@ -487,8 +488,8 @@ export function DocumentsList() {
                             <span>•</span>
                             <span>{formatBytes(doc.size)}</span>
                             <span>•</span>
-                            <span className="text-primary font-semibold">
-                              {doc.chunks} مقطع معرفي
+                            <span className="text-neutral-300 font-mono">
+                              {doc.chunks} chunks
                             </span>
                             <span className="hidden sm:inline">•</span>
                             <span className="hidden sm:flex items-center gap-1">
@@ -509,10 +510,10 @@ export function DocumentsList() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-8 text-xs gap-1.5 hover:border-primary/50 hover:bg-primary/10 hover:text-primary transition-all rounded-xl"
+                            className="h-8 text-xs gap-1.5 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900 text-neutral-200 transition-all rounded-lg"
                             title="استجواب هذا المستند في استوديو المحادثة"
                           >
-                            <MessageSquare className="size-3.5 text-primary" />
+                            <MessageSquare className="size-3.5 text-neutral-300" />
                             <span className="hidden sm:inline">استجواب</span>
                           </Button>
                         </Link>
@@ -571,16 +572,16 @@ export function DocumentsList() {
                     <div
                       key={col.id}
                       className={cn(
-                        "rounded-2xl border p-5 transition-all space-y-3 flex flex-col justify-between",
+                        "rounded-xl border p-5 transition-all space-y-3 flex flex-col justify-between",
                         isCurrentActive
-                          ? "border-primary bg-primary/5 ring-1 ring-primary/30"
-                          : "border-border/80 bg-card hover:border-primary/40"
+                          ? "border-neutral-500 bg-neutral-900/60 ring-1 ring-neutral-500"
+                          : "border-border/80 bg-card hover:border-neutral-700"
                       )}
                     >
                       <div>
                         <div className="flex items-center justify-between">
-                          <div className="flex size-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                            <FolderOpen className="size-5" />
+                          <div className="flex size-9 items-center justify-center rounded border border-neutral-800 bg-neutral-900 text-neutral-200">
+                            <FolderOpen className="size-4" />
                           </div>
                           <Button
                             variant="ghost"
@@ -602,7 +603,7 @@ export function DocumentsList() {
                         <Button
                           size="sm"
                           variant={isCurrentActive ? "default" : "outline"}
-                          className="h-8 text-xs w-full font-semibold rounded-xl"
+                          className="h-8 text-xs w-full font-semibold rounded-lg"
                           onClick={() => {
                             if (isCurrentActive) {
                               setActiveCollectionId(null);

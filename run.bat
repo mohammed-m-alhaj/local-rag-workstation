@@ -1,11 +1,11 @@
 @echo off
 chcp 65001 > nul
-title Q9 AI - Production RAG Platform
-color 0b
+title Local RAG Workstation - Production RAG Platform
+color 0f
 
 echo =====================================================================
-echo    🚀 Q9 AI - Production RAG Agent Platform
-echo    منظومة الاستخبارات المعرفية واستنطاق المستندات
+echo    🚀 Local RAG Workstation (Production RAG Platform)
+echo    منظومة استنطاق المستندات واسترجاع المعرفة المحلية والإنتاجية
 echo =====================================================================
 echo.
 
@@ -38,15 +38,15 @@ if not exist backend\.env (
 )
 
 echo.
-echo [*] Starting Q9 AI Backend (FastAPI on http://localhost:8000)...
-start "Q9 AI Backend (FastAPI)" cmd /k "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000"
+echo [*] Starting Backend (FastAPI on http://localhost:8000)...
+start "Local RAG Workstation - Backend (FastAPI)" cmd /k "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000"
 
-echo [*] Starting Q9 AI Frontend (Next.js on http://localhost:3000)...
-start "Q9 AI Frontend (Next.js)" cmd /k "npm run dev"
+echo [*] Starting Frontend (Next.js on http://localhost:3000)...
+start "Local RAG Workstation - Frontend (Next.js)" cmd /k "npm run dev"
 
 echo.
 echo [✓] Systems are launching!
-echo [✓] Frontend: http://localhost:3000
+echo [✓] Frontend Workstation: http://localhost:3000
 echo [✓] Backend API Docs: http://localhost:8000/docs
 echo.
 echo Opening browser in 5 seconds...
@@ -54,7 +54,7 @@ timeout /t 5 > nul
 start http://localhost:3000
 
 echo =====================================================================
-echo    Q9 AI is running. Press any key to close this launcher window.
+echo    Local RAG Workstation is running. Press any key to close launcher.
 echo    (Backend and Frontend will keep running in their own windows)
 echo =====================================================================
 pause > nul

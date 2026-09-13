@@ -11,7 +11,7 @@ export function HealthStatus() {
 
   const services = [
     { name: "خادم الـ API (FastAPI)", key: "backend", value: health?.backend ?? health?.status, icon: Server },
-    { name: "المحرك العصبي الذكي (Qwen 3.5 4B)", key: "neural", value: health?.gemini ?? "connected", icon: Zap },
+    { name: "المحرك العصبي (Qwen 2.5)", key: "neural", value: health?.gemini ?? "connected", icon: Zap },
     { name: "قاعدة بيانات PostgreSQL", key: "postgres", value: health?.postgres, icon: Database },
     { name: "محرك المتجهات (Qdrant Vector DB)", key: "qdrant", value: health?.qdrant, icon: ShieldCheck },
   ];
@@ -19,12 +19,12 @@ export function HealthStatus() {
   const getStatusColor = (val: string | undefined) => {
     const status = String(val ?? "unknown").toLowerCase();
     if (status === "connected" || status === "ok" || status === "healthy") {
-      return "text-emerald-500 bg-emerald-500/10 border-emerald-500/20";
+      return "text-foreground bg-muted/80 border-border";
     }
     if (status === "not_connected" || status === "disconnected" || status === "failed") {
-      return "text-rose-500 bg-rose-500/10 border-rose-500/20";
+      return "text-destructive bg-destructive/10 border-destructive/20";
     }
-    return "text-amber-500 bg-amber-500/10 border-amber-500/20";
+    return "text-muted-foreground bg-muted/40 border-border";
   };
 
   const getStatusLabel = (val: string | undefined) => {
@@ -41,12 +41,12 @@ export function HealthStatus() {
   const getStatusIcon = (val: string | undefined) => {
     const status = String(val ?? "unknown").toLowerCase();
     if (status === "connected" || status === "ok" || status === "healthy") {
-      return <CheckCircle2 className="size-3.5" />;
+      return <CheckCircle2 className="size-3.5 text-foreground" />;
     }
     if (status === "not_connected" || status === "disconnected" || status === "failed") {
-      return <XCircle className="size-3.5" />;
+      return <XCircle className="size-3.5 text-destructive" />;
     }
-    return <RefreshCw className="size-3.5 animate-spin" />;
+    return <RefreshCw className="size-3.5 animate-spin text-muted-foreground" />;
   };
 
   return (
@@ -55,8 +55,7 @@ export function HealthStatus() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.15 }}
     >
-      <Card className="relative overflow-hidden border-border/80 shadow-xs">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-violet-500/5" />
+      <Card className="border border-border bg-card shadow-none">
         <CardHeader className="flex flex-row items-center justify-between pb-3">
           <div>
             <CardTitle className="text-base font-bold">حالة واستقرار البنية التحتية</CardTitle>

@@ -56,11 +56,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("PostgreSQL tables verified / created")
 
     # ── Startup: ensure Qdrant collection exists ──────────────────────────────
-    await ensure_collection()
+    try:
+        await ensure_collection()
+    except Exception as exc:
+        logger.warning("Qdrant collection setup deferred (will reconnect when available): %s", exc)
 
     # ── Startup: recover stuck documents ──────────────────────────────────────
-    from app.services.document_service import recover_stuck_documents
-    await recover_stuck_documents()
+    try:
+        from app.services.document_service import recover_stuck_documents
+        await recover_stuck_documents()
+    except Exception as exc:
+        logger.warning("Document recovery deferred: %s", exc)
 
     yield
 

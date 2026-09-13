@@ -50,21 +50,21 @@ export function QuickActions() {
               <>
                 <div
                   className={cn(
-                    "flex size-10 shrink-0 items-center justify-center rounded-lg",
+                    "flex size-10 shrink-0 items-center justify-center rounded-lg border",
                     isPrimary
-                      ? "bg-primary-foreground/15"
-                      : "bg-primary/10 text-primary"
+                      ? "bg-neutral-200 text-black border-neutral-300"
+                      : "bg-neutral-900 text-neutral-200 border-neutral-800"
                   )}
                 >
                   <Icon className="size-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium">{action.label}</p>
+                  <p className="text-sm font-semibold">{action.label}</p>
                   <p
                     className={cn(
                       "mt-0.5 truncate text-xs",
                       isPrimary
-                        ? "text-primary-foreground/70"
+                        ? "text-neutral-700 font-medium"
                         : "text-muted-foreground"
                     )}
                   >
@@ -75,8 +75,8 @@ export function QuickActions() {
                   className={cn(
                     "size-4 shrink-0 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100",
                     isPrimary
-                      ? "text-primary-foreground/60"
-                      : "text-muted-foreground"
+                      ? "text-black"
+                      : "text-neutral-400"
                   )}
                 />
               </>
@@ -91,8 +91,8 @@ export function QuickActions() {
               >
                 {action.id === "upload" ? (
                   <Button
-                    variant="default"
-                    className="group h-auto w-full justify-start gap-3 px-4 py-4 text-left"
+                    variant="outline"
+                    className="group h-auto w-full justify-start gap-3 px-4 py-3.5 text-left bg-white text-black hover:bg-neutral-200 border-neutral-300 rounded-lg cursor-pointer"
                     onClick={() => {
                       const el = document.getElementById("upload");
                       el?.scrollIntoView({ behavior: "smooth" });
@@ -103,7 +103,7 @@ export function QuickActions() {
                 ) : (
                   <Button
                     variant="outline"
-                    className="group h-auto w-full justify-start gap-3 px-4 py-4 text-left hover:border-primary/30 hover:bg-primary/5"
+                    className="group h-auto w-full justify-start gap-3 px-4 py-3.5 text-left border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900 text-neutral-200 rounded-lg cursor-pointer"
                     asChild
                   >
                     <Link href={action.href}>{content}</Link>

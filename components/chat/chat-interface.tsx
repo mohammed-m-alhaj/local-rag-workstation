@@ -76,7 +76,7 @@ function ChatInterfaceInner() {
   // History & Sidebar State
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [historySearch, setHistorySearch] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   // Documents & Scope State
@@ -239,7 +239,7 @@ function ChatInterfaceInner() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `Q9_Chat_Export_${new Date().toISOString().slice(0, 10)}.md`;
+    link.download = `Local_RAG_Chat_${new Date().toISOString().slice(0, 10)}.md`;
     link.click();
     URL.revokeObjectURL(url);
     toast.success("تم تصدير نص المحادثة بصيغة Markdown");
@@ -355,22 +355,22 @@ function ChatInterfaceInner() {
   const selectedDoc = documents.find((d) => d.id === selectedDocId);
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] w-full overflow-hidden bg-background">
+    <div className="flex h-full w-full overflow-hidden bg-background">
       {/* ── Collapsible History & Scope Sidebar ────────────────────────── */}
       <aside
         className={cn(
-          "border-l border-border/70 bg-card/60 backdrop-blur-md flex flex-col transition-all duration-300 z-20 shrink-0",
-          isSidebarOpen ? "w-80" : "w-0 overflow-hidden border-none"
+          "border-l border-border bg-card flex flex-col transition-all duration-200 z-20 shrink-0",
+          isSidebarOpen ? "w-72" : "w-0 overflow-hidden border-none"
         )}
       >
         {/* Sidebar Header */}
-        <div className="p-3 border-b border-border/60 flex items-center justify-between gap-2">
+        <div className="p-2.5 border-b border-border flex items-center justify-between gap-2">
           <Button
             size="sm"
             onClick={startNewChat}
-            className="flex-1 text-xs font-bold gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xs rounded-xl"
+            className="flex-1 text-xs font-semibold gap-1.5 bg-foreground text-background hover:bg-foreground/90 rounded cursor-pointer"
           >
-            <Plus className="size-4" />
+            <Plus className="size-3.5" />
             <span>محادثة جديدة</span>
           </Button>
 
@@ -416,9 +416,9 @@ function ChatInterfaceInner() {
                   key={conv.id}
                   onClick={() => loadChat(conv.id)}
                   className={cn(
-                    "group flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer transition-colors text-right",
+                    "group flex items-center justify-between px-2.5 py-1.5 rounded text-xs cursor-pointer transition-colors text-right",
                     isActive
-                      ? "bg-primary/10 text-primary font-bold shadow-2xs border border-primary/20"
+                      ? "bg-muted text-foreground font-semibold"
                       : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                   )}
                 >
@@ -441,16 +441,16 @@ function ChatInterfaceInner() {
         </div>
 
         {/* Knowledge Scope / Active Document Filter */}
-        <div className="p-3 border-t border-border/60 bg-muted/20 space-y-2">
-          <label className="text-[11px] font-bold text-foreground block">
-            نطاق الاستجواب والمستندات:
+        <div className="p-3 border-t border-border bg-card/60 space-y-2">
+          <label className="text-[11px] font-medium text-muted-foreground block">
+            نطاق الاستجواب:
           </label>
           <select
             value={selectedDocId ?? ""}
             onChange={(e) => setSelectedDocId(e.target.value || null)}
-            className="w-full text-xs rounded-xl border border-border/80 bg-background px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full text-xs rounded border border-border bg-background px-2.5 py-1.5 focus:outline-none focus:border-foreground"
           >
-            <option value="">جميع المستندات (قاعدة المعرفة كاملة)</option>
+            <option value="">جميع المستندات (الكل)</option>
             {documents.map((doc) => (
               <option key={doc.id} value={doc.id}>
                 📄 {doc.name}
@@ -458,20 +458,20 @@ function ChatInterfaceInner() {
             ))}
           </select>
 
-          <div className="rounded-xl border border-border/60 bg-background/50 p-2 text-[11px] space-y-1">
+          <div className="rounded border border-border bg-background p-2 text-[11px] space-y-1">
             <div className="flex items-center justify-between text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                المحرك العصبي
+                <span className="size-1.5 rounded-full bg-emerald-500" />
+                المحرك المحلي
               </span>
-              <span className="font-mono text-[10px] text-foreground font-semibold">Qwen 2.5 (LM Studio)</span>
+              <span className="font-mono text-[10px] text-foreground">LM Studio (Qwen)</span>
             </div>
             <div className="flex items-center justify-between text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <Zap className="size-3 text-amber-500" />
-                محرك البحث
+                <span className="size-1.5 rounded-full bg-emerald-500" />
+                محرك المتجهات
               </span>
-              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Qdrant Vector DB</span>
+              <span className="font-mono text-[10px] text-foreground">Qdrant Vector DB</span>
             </div>
           </div>
         </div>
@@ -479,52 +479,44 @@ function ChatInterfaceInner() {
 
       {/* ── Main Chat Workspace ────────────────────────────────────────── */}
       <section className="flex flex-1 flex-col h-full min-w-0 overflow-hidden relative">
-        {/* Workspace Top Bar */}
-        <div className="h-14 border-b border-border/60 px-4 flex items-center justify-between bg-background/80 backdrop-blur-md z-10">
-          <div className="flex items-center gap-2.5">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8 text-muted-foreground hover:text-foreground"
+        {/* Workspace Sub-Toolbar */}
+        <div className="h-9 border-b border-border px-3 flex items-center justify-between bg-card/40 shrink-0 text-xs">
+          <div className="flex items-center gap-2">
+            <button
               onClick={() => setIsSidebarOpen((prev) => !prev)}
-              title={isSidebarOpen ? "إخفاء القائمة الجانبية" : "إظهار القائمة الجانبية"}
-            >
-              {isSidebarOpen ? (
-                <PanelLeftClose className="size-4" />
-              ) : (
-                <PanelLeftOpen className="size-4" />
+              className={cn(
+                "flex items-center gap-1.5 text-xs px-2 py-1 rounded transition-colors cursor-pointer",
+                isSidebarOpen ? "bg-muted text-foreground font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}
-            </Button>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-black bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent font-mono">
-                Q9 AI Studio
-              </span>
-              <span className="text-[11px] text-muted-foreground hidden sm:inline-block border-r border-border/80 pr-2 mr-2">
-                {activeConversationId ? "جلسة استرجاع معرفي نشطة" : "محادثة جديدة"}
-              </span>
-            </div>
+              title={isSidebarOpen ? "إخفاء سجل المحادثات" : "عرض سجل المحادثات"}
+            >
+              <MessageSquare className="size-3.5" />
+              <span>سجل المحادثات ({conversations.length})</span>
+            </button>
+
+            <span className="text-border">|</span>
+
+            <span className="text-[11px] text-muted-foreground font-mono">
+              {activeConversationId ? "جلسة نشطة" : "محادثة جديدة"}
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
             {messages.length > 0 && (
               <>
-                <Button
-                  variant="outline"
-                  size="sm"
+                <button
                   onClick={exportChat}
-                  className="h-8 text-xs gap-1.5 border-border/80 hover:bg-muted rounded-xl"
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-muted cursor-pointer"
                 >
-                  <Download className="size-3.5" />
-                  <span className="hidden sm:inline">تصدير المحادثة</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
+                  <Download className="size-3" />
+                  <span>تصدير</span>
+                </button>
+                <button
                   onClick={startNewChat}
-                  className="h-8 text-xs text-muted-foreground hover:text-foreground rounded-xl"
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-muted cursor-pointer"
                 >
-                  مسح
-                </Button>
+                  <span>مسح</span>
+                </button>
               </>
             )}
           </div>
@@ -537,54 +529,51 @@ function ChatInterfaceInner() {
           className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 md:px-8 space-y-6 relative"
         >
           {messages.length === 0 ? (
-            /* Welcome Hero & Smart Suggestions */
-            <div className="flex min-h-full flex-col items-center justify-center max-w-2xl mx-auto text-center px-4 py-12 animate-in fade-in duration-500">
-              <div className="size-16 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 p-[1px] shadow-lg shadow-blue-500/20 mb-6">
-                <div className="flex h-full w-full items-center justify-center rounded-2xl bg-background">
-                  <Sparkles className="size-8 text-primary animate-pulse" />
-                </div>
+            /* Welcome State */
+            <div className="flex min-h-full flex-col items-center justify-center max-w-xl mx-auto text-center px-4 py-12">
+              <div className="size-10 rounded border border-border bg-card flex items-center justify-center mb-4 font-mono font-black text-xs text-foreground">
+                RAG
               </div>
 
-              <h2 className="text-2xl font-black tracking-tight sm:text-3xl bg-gradient-to-r from-foreground via-foreground/90 to-primary bg-clip-text text-transparent">
-                استوديو استنطاق المستندات الذكي
+              <h2 className="text-lg font-bold text-foreground tracking-tight">
+                Local RAG Workstation • استوديو الاستنطاق
               </h2>
-              <p className="mt-2 text-sm text-muted-foreground max-w-md leading-relaxed">
-                اطرح أي استفسار حول مستنداتك لتستلم إجابات موثقة بدقة قطعية بالصفحة والفقرة الأصلية.
+              <p className="mt-1.5 text-xs text-muted-foreground max-w-md leading-relaxed">
+                استخرج المعلومات الموثقة برقم الصفحة والفقرة من مستنداتك عبر الذكاء الاصطناعي المحلي.
               </p>
 
               {/* Suggestions or Upload Prompt */}
               {documents.length === 0 ? (
-                <div className="mt-8 p-6 rounded-2xl border border-dashed border-primary/40 bg-card/60 max-w-md text-center space-y-3">
-                  <UploadCloud className="size-8 text-primary mx-auto" />
-                  <p className="text-xs font-bold text-foreground">قاعدة المعرفة فارغة حالياً</p>
+                <div className="mt-6 p-5 rounded border border-dashed border-border bg-card/60 max-w-md text-center space-y-2.5">
+                  <UploadCloud className="size-6 text-muted-foreground mx-auto" />
+                  <p className="text-xs font-semibold text-foreground">قاعدة المعرفة فارغة حالياً</p>
                   <p className="text-[11px] text-muted-foreground">
-                    قم بإرفاق أو رفع مستند أولاً لتتمكن من استنطاقه والبحث فيه.
+                    قم برفع أو إرفاق مستند أولاً لتتمكن من استنطاقه والبحث فيه.
                   </p>
                   <Button
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
-                    className="h-8 text-xs font-bold gap-1.5 rounded-xl"
+                    className="h-7 text-xs font-medium gap-1.5 rounded bg-foreground text-background hover:bg-foreground/90 cursor-pointer"
                   >
-                    <Paperclip className="size-3.5" />
+                    <Paperclip className="size-3" />
                     <span>إرفاق مستند الآن</span>
                   </Button>
                 </div>
               ) : (
-                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-right">
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2 w-full text-right">
                   {suggestedQuestions.map((q) => (
                     <button
                       key={q}
                       onClick={() => sendQuery(q)}
                       disabled={isStreaming}
-                      className="flex flex-col justify-between p-3.5 rounded-xl border border-border/70 bg-card hover:bg-muted/50 hover:border-primary/50 transition-all text-right group shadow-xs hover:shadow-sm cursor-pointer"
+                      className="flex flex-col justify-between p-2.5 rounded border border-border bg-card hover:bg-muted/50 hover:border-foreground/30 transition-colors text-right cursor-pointer"
                     >
-                      <span className="text-xs font-medium text-foreground group-hover:text-primary transition-colors leading-relaxed">
+                      <span className="text-xs text-foreground leading-relaxed">
                         {q}
                       </span>
-                      <div className="mt-2 flex items-center justify-end gap-1 text-[11px] text-muted-foreground opacity-60 group-hover:opacity-100">
-                        <span>إرسال فوري</span>
-                        <ChevronRight className="size-3 rotate-180" />
-                      </div>
+                      <span className="mt-2 font-mono text-[10px] text-muted-foreground">
+                        _ اضغط للإرسال
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -602,39 +591,39 @@ function ChatInterfaceInner() {
                   )}
                 >
                   {message.role === "assistant" && (
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-sm mt-0.5">
-                      <Sparkles className="size-4" />
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded bg-foreground text-background font-mono font-bold text-[10px] mt-0.5">
+                      RAG
                     </div>
                   )}
 
                   <div
                     className={cn(
-                      "relative group rounded-2xl px-5 py-4 text-sm leading-relaxed max-w-[85%]",
+                      "relative group rounded px-4 py-3 text-xs sm:text-sm leading-relaxed max-w-[85%]",
                       message.role === "user"
-                        ? "bg-primary text-primary-foreground shadow-sm rounded-br-xs"
-                        : "bg-muted/60 border border-border/60 rounded-bl-xs text-foreground"
+                        ? "bg-muted text-foreground border border-border"
+                        : "bg-card border border-border text-foreground"
                     )}
                   >
                     {message.role === "assistant" ? (
-                      <div className="prose prose-sm dark:prose-invert max-w-none space-y-3">
+                      <div className="prose prose-sm dark:prose-invert max-w-none space-y-2.5">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {message.content || (message.isStreaming ? "▍" : "")}
                         </ReactMarkdown>
 
                         {message.isStreaming && (
-                          <span className="inline-block animate-pulse text-primary font-bold">
+                          <span className="inline-block animate-pulse text-foreground font-bold">
                             ▍
                           </span>
                         )}
 
                         {/* Message Actions */}
                         {!message.isStreaming && message.content && (
-                          <div className="flex items-center justify-between border-t border-border/40 pt-2 mt-3 text-xs text-muted-foreground">
+                          <div className="flex items-center justify-between border-t border-border pt-2 mt-2 text-xs text-muted-foreground">
                             <div className="flex items-center gap-1.5">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-7 px-2 text-xs gap-1 hover:text-foreground rounded-lg"
+                                className="h-6 px-2 text-xs gap-1 hover:text-foreground rounded"
                                 onClick={() => copyToClipboard(message.content, message.id)}
                               >
                                 {copiedId === message.id ? (
@@ -654,7 +643,7 @@ function ChatInterfaceInner() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-7 px-2 text-xs gap-1 hover:text-foreground rounded-lg"
+                                  className="h-6 px-2 text-xs gap-1 hover:text-foreground rounded"
                                   onClick={() => sendQuery(lastQuery, true)}
                                   title="إعادة صياغة الإجابة"
                                 >
@@ -663,7 +652,7 @@ function ChatInterfaceInner() {
                                 </Button>
                               )}
                             </div>
-                            <span className="text-[10px] opacity-70">
+                            <span className="text-[10px] font-mono opacity-70">
                               {message.content.length} حرف
                             </span>
                           </div>
@@ -675,7 +664,7 @@ function ChatInterfaceInner() {
 
                     {/* Error Box */}
                     {message.error && (
-                      <div className="mt-3 flex items-center gap-2 rounded-xl bg-destructive/10 p-3 text-xs text-destructive border border-destructive/20">
+                      <div className="mt-2.5 flex items-center gap-2 rounded bg-destructive/10 p-2.5 text-xs text-destructive border border-destructive/20">
                         <AlertCircle className="size-4 shrink-0" />
                         <span>{message.error}</span>
                         {lastQuery && !message.isStreaming && (
@@ -693,33 +682,33 @@ function ChatInterfaceInner() {
 
                     {/* Interactive Source Citations */}
                     {message.sources && message.sources.length > 0 && (
-                      <div className="mt-4 border-t border-border/60 pt-3 space-y-2">
+                      <div className="mt-3 border-t border-border pt-2.5 space-y-1.5">
                         <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                          <FileText className="size-3.5 text-primary" />
+                          <FileText className="size-3.5" />
                           <span>المصادر الموثقة ({message.sources.length})</span>
                           <span className="text-[10px] text-muted-foreground font-normal">
-                            • اضغط على المصدر لعرض الفقرة الأصلية
+                            • اضغط للمعاينة
                           </span>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-1.5">
                           {message.sources.map((source, i) => (
                             <button
                               key={i}
                               onClick={() => setActiveSource(source)}
-                              className="flex items-center gap-1.5 rounded-xl border border-border/80 bg-background/80 px-2.5 py-1.5 text-xs font-medium hover:border-primary/60 hover:bg-primary/5 transition-all shadow-2xs group text-right cursor-pointer"
+                              className="flex items-center gap-1.5 rounded border border-border bg-background px-2 py-1 text-xs font-medium hover:border-foreground/40 hover:bg-muted/40 transition-colors group text-right cursor-pointer"
                             >
-                              <span className="text-muted-foreground group-hover:text-primary">📄</span>
+                              <span className="text-muted-foreground">📄</span>
                               <span className="truncate max-w-[160px] text-foreground">
                                 {source.documentName ?? "مستند"}
                               </span>
                               {source.page && (
-                                <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                                <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground font-mono">
                                   ص {source.page}
                                 </span>
                               )}
                               {source.score && (
-                                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
+                                <span className="text-[10px] text-muted-foreground font-mono">
                                   {Math.round(source.score * 100)}%
                                 </span>
                               )}
@@ -731,8 +720,8 @@ function ChatInterfaceInner() {
                   </div>
 
                   {message.role === "user" && (
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-muted border border-border/60 text-muted-foreground mt-0.5">
-                      <User className="size-4" />
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded bg-muted border border-border text-muted-foreground mt-0.5">
+                      <User className="size-3.5" />
                     </div>
                   )}
                 </div>
@@ -747,16 +736,16 @@ function ChatInterfaceInner() {
               variant="outline"
               size="sm"
               onClick={scrollToBottom}
-              className="fixed bottom-28 left-1/2 -translate-x-1/2 z-30 shadow-lg border-primary/40 bg-background/95 backdrop-blur-md text-xs gap-1.5 rounded-full px-4"
+              className="fixed bottom-28 left-1/2 -translate-x-1/2 z-30 shadow-md border-border bg-card text-xs gap-1.5 rounded px-3 py-1 cursor-pointer"
             >
-              <ArrowDown className="size-3.5 text-primary" />
+              <ArrowDown className="size-3 text-foreground" />
               <span>النزول للأسفل</span>
             </Button>
           )}
         </div>
 
-        {/* Bottom Floating Input Dock */}
-        <div className="p-4 bg-gradient-to-t from-background via-background to-transparent pt-4">
+        {/* Bottom Input Dock */}
+        <div className="p-3 bg-background border-t border-border shrink-0">
           <div className="max-w-3xl mx-auto">
             {/* Hidden Attachment Input */}
             <input
@@ -769,16 +758,16 @@ function ChatInterfaceInner() {
 
             {/* Active Document Scope Banner */}
             {selectedDoc && (
-              <div className="flex items-center justify-between px-3.5 py-1.5 mb-2 rounded-xl bg-primary/10 border border-primary/20 text-xs animate-in fade-in">
-                <span className="flex items-center gap-1.5 text-primary font-semibold truncate">
-                  <FileText className="size-3.5 shrink-0" />
-                  <span>نطاق الاستجواب محصور على:</span>
-                  <span className="font-bold text-foreground truncate max-w-xs">{selectedDoc.name}</span>
+              <div className="flex items-center justify-between px-3 py-1.5 mb-2 rounded border border-border bg-card text-xs">
+                <span className="flex items-center gap-1.5 text-foreground font-medium truncate">
+                  <FileText className="size-3.5 shrink-0 text-muted-foreground" />
+                  <span>نطاق الاستجواب:</span>
+                  <span className="font-mono text-foreground truncate max-w-xs">{selectedDoc.name}</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => setSelectedDocId(null)}
-                  className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground mr-2 cursor-pointer font-medium"
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground mr-2 cursor-pointer"
                   title="إلغاء الحصر والبحث في كافة المستندات"
                 >
                   <span>إلغاء الحصر</span>
@@ -789,10 +778,10 @@ function ChatInterfaceInner() {
 
             {/* Attaching Progress Pill */}
             {attaching && (
-              <div className="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-xl bg-muted border border-border text-xs">
-                <Loader2 className="size-3.5 animate-spin text-primary" />
+              <div className="flex items-center gap-2 px-3 py-1.5 mb-2 rounded border border-border bg-card text-xs">
+                <Loader2 className="size-3.5 animate-spin text-foreground" />
                 <span className="text-muted-foreground">جاري فهرسة المستند المرفق...</span>
-                <span className="font-mono text-primary font-bold mr-auto">{attachmentProgress}%</span>
+                <span className="font-mono text-foreground font-bold mr-auto">{attachmentProgress}%</span>
               </div>
             )}
 
@@ -801,31 +790,29 @@ function ChatInterfaceInner() {
                 e.preventDefault();
                 sendQuery(input);
               }}
-              className="relative flex items-center rounded-2xl border border-border/80 bg-background/90 backdrop-blur-xl shadow-md focus-within:border-primary/70 focus-within:ring-2 focus-within:ring-primary/20 transition-all p-2"
+              className="relative flex items-center rounded border border-border bg-card focus-within:border-foreground/40 transition-colors p-1.5"
             >
               {/* Attachment Button */}
-              <Button
+              <button
                 type="button"
-                variant="ghost"
-                size="icon"
                 disabled={attaching || isStreaming}
                 onClick={() => fileInputRef.current?.click()}
-                className="size-9 rounded-xl text-muted-foreground hover:text-foreground shrink-0 cursor-pointer"
+                className="size-7 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 shrink-0 cursor-pointer"
                 title="إرفاق مستند جديد للاستجواب الفوري"
               >
                 {attaching ? (
-                  <Loader2 className="size-4 animate-spin text-primary" />
+                  <Loader2 className="size-3.5 animate-spin text-foreground" />
                 ) : (
-                  <Paperclip className="size-4" />
+                  <Paperclip className="size-3.5" />
                 )}
-              </Button>
+              </button>
 
               <Textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="اسأل أي سؤال حول مستنداتك... (Enter للإرسال)"
-                className="min-h-[44px] max-h-32 border-0 bg-transparent focus-visible:ring-0 resize-none py-2.5 px-3 text-sm flex-1"
+                placeholder="اسأل سؤالاً حول المستندات... (Enter للإرسال)"
+                className="min-h-[36px] max-h-32 border-0 bg-transparent focus-visible:ring-0 resize-none py-2 px-2.5 text-xs sm:text-sm flex-1 text-foreground placeholder:text-muted-foreground"
                 rows={1}
                 disabled={isStreaming}
                 onKeyDown={(e) => {
@@ -838,33 +825,30 @@ function ChatInterfaceInner() {
 
               <div className="flex items-center gap-1.5 pl-1 shrink-0">
                 {isStreaming ? (
-                  <Button
+                  <button
                     type="button"
-                    variant="outline"
-                    size="icon"
                     onClick={stopGeneration}
-                    className="size-9 rounded-xl border-destructive/40 text-destructive hover:bg-destructive/10 cursor-pointer"
+                    className="size-7 rounded flex items-center justify-center border border-destructive/40 text-destructive hover:bg-destructive/10 cursor-pointer"
                     title="إيقاف التوليد"
                   >
-                    <Square className="size-4" />
-                  </Button>
+                    <Square className="size-3" />
+                  </button>
                 ) : (
-                  <Button
+                  <button
                     type="submit"
-                    size="icon"
                     disabled={!input.trim()}
-                    className="size-9 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm cursor-pointer"
+                    className="size-7 rounded flex items-center justify-center bg-foreground text-background hover:bg-foreground/90 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
                     title="إرسال السؤال"
                   >
-                    <Send className="size-4" />
-                  </Button>
+                    <Send className="size-3.5" />
+                  </button>
                 )}
               </div>
             </form>
 
-            <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground px-2">
-              <span>منظومة Q9 AI تستخرج الإجابات الموثقة من مستنداتك المحلية بأمان وسرية تامة.</span>
-              <span className="hidden sm:inline">Enter للإرسال • Shift + Enter لسطر جديد</span>
+            <div className="mt-1.5 flex items-center justify-between text-[10px] font-mono text-muted-foreground px-1">
+              <span>معالجة محلية 100% On-Premises • LM Studio + Qdrant</span>
+              <span className="hidden sm:inline">Enter: إرسال • Shift+Enter: سطر جديد</span>
             </div>
           </div>
         </div>
@@ -877,39 +861,39 @@ function ChatInterfaceInner() {
       >
         <DialogContent className="max-w-xl max-h-[85vh] flex flex-col text-right">
           <DialogHeader className="text-right">
-            <DialogTitle className="flex items-center gap-2 text-base">
-              <FileText className="size-4 text-primary" />
-              <span>معاينة الاقتباس الأصلي</span>
+            <DialogTitle className="flex items-center gap-2 text-sm font-bold">
+              <FileText className="size-4 text-foreground" />
+              <span>معاينة الاقتباس الموثق</span>
             </DialogTitle>
             <DialogDescription className="text-xs">
-              الفقرة التي تم استرجاعها مباشرة من قاعدة بيانات المتجهات لتوثيق الإجابة
+              الفقرة المسترجعة مباشرة من محرك البحث الدلالي لدعم الإجابة
             </DialogDescription>
           </DialogHeader>
 
           {activeSource && (
-            <div className="space-y-4 my-2 flex-1 overflow-y-auto">
-              <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-muted/50 border border-border/60 text-xs">
+            <div className="space-y-3 my-2 flex-1 overflow-y-auto">
+              <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded border border-border bg-muted/40 text-xs">
                 <div>
-                  <span className="text-muted-foreground">اسم المستند: </span>
+                  <span className="text-muted-foreground">المستند: </span>
                   <span className="font-semibold text-foreground">
                     {activeSource.documentName ?? "غير محدد"}
                   </span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 text-[11px] font-mono">
                   {activeSource.page && (
-                    <span className="bg-background px-2 py-0.5 rounded-lg border border-border/80 font-medium">
-                      رقم الصفحة: {activeSource.page}
+                    <span className="bg-background px-2 py-0.5 rounded border border-border">
+                      ص {activeSource.page}
                     </span>
                   )}
                   {activeSource.score && (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-mono font-semibold">
+                    <span className="text-foreground">
                       تطابق: {Math.round(activeSource.score * 100)}%
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="relative rounded-xl border border-border/80 bg-background p-4 text-xs font-mono leading-relaxed text-muted-foreground whitespace-pre-wrap max-h-72 overflow-y-auto">
+              <div className="relative rounded border border-border bg-background p-3 text-xs font-mono leading-relaxed text-muted-foreground whitespace-pre-wrap max-h-72 overflow-y-auto">
                 {activeSource.chunkText ?? "لا يوجد نص متاح."}
               </div>
 
@@ -917,7 +901,7 @@ function ChatInterfaceInner() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs rounded-xl"
+                  className="text-xs rounded h-7 cursor-pointer"
                   onClick={() => {
                     if (activeSource.chunkText) {
                       navigator.clipboard.writeText(activeSource.chunkText);
@@ -930,7 +914,7 @@ function ChatInterfaceInner() {
                 </Button>
                 <Button
                   size="sm"
-                  className="text-xs rounded-xl"
+                  className="text-xs rounded h-7 bg-foreground text-background hover:bg-foreground/90 cursor-pointer"
                   onClick={() => setActiveSource(null)}
                 >
                   إغلاق

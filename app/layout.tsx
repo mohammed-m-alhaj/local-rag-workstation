@@ -22,8 +22,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Q9 AI | منصة الاستخبارات المعرفية واستنطاق المستندات",
-  description: "منصة الذكاء الاصطناعي المؤسسية Q9: استرجاع معرفي فائق الدقة، كاش فوري 0.13s، وسرية بيانات محلية 100%.",
+  title: "Local RAG Workstation | Production RAG Agent",
+  description: "Enterprise-Grade Retrieval-Augmented Generation (RAG) Platform & Workstation.",
 };
 
 export default function RootLayout({

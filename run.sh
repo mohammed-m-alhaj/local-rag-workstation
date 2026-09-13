@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 # =====================================================================
-#    🚀 Q9 AI - Production RAG Agent Platform (Linux / macOS Launcher)
-#    منظومة الاستخبارات المعرفية واستنطاق المستندات
+#    🚀 Local RAG Workstation (Production RAG Platform)
+#    منظومة استنطاق المستندات واسترجاع المعرفة المحلية والإنتاجية
 # =====================================================================
 
 set -e
 
-echo "=== Starting Q9 AI Platform ==="
+echo "=== Starting Local RAG Workstation ==="
 
 # Check Python
 if ! command -v python3 &> /dev/null; then
@@ -42,7 +42,7 @@ FRONTEND_PID=$!
 
 cleanup() {
     echo ""
-    echo "Shutting down Q9 AI services..."
+    echo "Shutting down Local RAG Workstation services..."
     kill $BACKEND_PID 2>/dev/null || true
     kill $FRONTEND_PID 2>/dev/null || true
     exit 0
@@ -51,7 +51,7 @@ cleanup() {
 trap cleanup INT TERM
 
 echo ""
-echo "[✓] Systems running:"
+echo "[✓] Local RAG Workstation running:"
 echo "    - Frontend: http://localhost:3000"
 echo "    - Backend:  http://localhost:8000/docs"
 echo ""

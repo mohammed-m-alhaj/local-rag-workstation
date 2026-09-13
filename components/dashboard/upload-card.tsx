@@ -145,10 +145,9 @@ export function UploadCard({ disabled, onUploadComplete }: UploadCardProps) {
       transition={{ duration: 0.4, delay: 0.1 }}
     >
       <Card className="relative overflow-hidden border-border/80 shadow-xs">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-violet-500/5" />
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-2xs">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-200 shadow-2xs">
               <CloudUpload className="size-5" />
             </div>
             <div>
@@ -188,10 +187,10 @@ export function UploadCard({ disabled, onUploadComplete }: UploadCardProps) {
                 isDragging ? { scale: 1.1, y: -4 } : { scale: 1, y: 0 }
               }
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="mb-3 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/20 text-primary shadow-xs"
+              className="mb-3 flex size-14 items-center justify-center rounded-xl bg-neutral-900 border border-neutral-800 text-white shadow-xs"
             >
               {uploading || processing ? (
-                <Loader2 className="size-7 animate-spin text-primary" />
+                <Loader2 className="size-7 animate-spin text-white" />
               ) : (
                 <FileUp className="size-7" />
               )}
@@ -206,11 +205,11 @@ export function UploadCard({ disabled, onUploadComplete }: UploadCardProps) {
                     : "اسحب وأفلت الملفات هنا، أو تصفح من جهازك"}
             </p>
             <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
-              <span className="bg-muted px-2 py-0.5 rounded-md font-mono">PDF</span>
-              <span className="bg-muted px-2 py-0.5 rounded-md font-mono">DOCX</span>
-              <span className="bg-muted px-2 py-0.5 rounded-md font-mono">XLSX</span>
-              <span className="bg-muted px-2 py-0.5 rounded-md font-mono">TXT</span>
-              <span className="bg-muted px-2 py-0.5 rounded-md font-mono">Markdown</span>
+              <span className="bg-neutral-900 border border-neutral-800 text-neutral-300 px-2 py-0.5 rounded font-mono">PDF</span>
+              <span className="bg-neutral-900 border border-neutral-800 text-neutral-300 px-2 py-0.5 rounded font-mono">DOCX</span>
+              <span className="bg-neutral-900 border border-neutral-800 text-neutral-300 px-2 py-0.5 rounded font-mono">XLSX</span>
+              <span className="bg-neutral-900 border border-neutral-800 text-neutral-300 px-2 py-0.5 rounded font-mono">TXT</span>
+              <span className="bg-neutral-900 border border-neutral-800 text-neutral-300 px-2 py-0.5 rounded font-mono">Markdown</span>
               <span>• حتى 50 ميغابايت لكل ملف</span>
             </div>
             {(uploading || processing) && (
@@ -220,7 +219,7 @@ export function UploadCard({ disabled, onUploadComplete }: UploadCardProps) {
               />
             )}
             <Button
-              className="mt-5 rounded-xl font-semibold gap-2 shadow-xs bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+              className="mt-5 rounded-lg font-semibold gap-2 shadow-xs bg-white hover:bg-neutral-200 text-black border border-neutral-300"
               size="sm"
               disabled={isDisabled}
               onClick={() => inputRef.current?.click()}

@@ -44,18 +44,18 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold border",
+        "inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-[11px] font-mono border",
         isHealthy
-          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-          : "bg-destructive/10 text-destructive border-destructive/20"
+          ? "bg-neutral-900 text-neutral-200 border-neutral-700"
+          : "bg-neutral-950 text-neutral-400 border-neutral-800"
       )}
     >
       {isHealthy ? (
-        <CheckCircle2 className="size-3" />
+        <CheckCircle2 className="size-3 text-neutral-200" />
       ) : (
-        <XCircle className="size-3" />
+        <XCircle className="size-3 text-neutral-400" />
       )}
-      <span>{isHealthy ? "متصل ونشط" : status}</span>
+      <span>{isHealthy ? "ONLINE / ACTIVE" : status.toUpperCase()}</span>
     </span>
   );
 }
@@ -172,10 +172,10 @@ export function SettingsPanel() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <Card className="border-border/80 shadow-2xs hover:border-primary/40 transition-all">
+                <Card className="border-border/80 shadow-2xs hover:border-neutral-600 transition-all">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <div className="flex items-center gap-3">
-                      <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <div className="flex size-10 items-center justify-center rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-200">
                         <Icon className="size-5" />
                       </div>
                       <div>
@@ -204,7 +204,7 @@ export function SettingsPanel() {
       <Card className="border-border/80 shadow-xs">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Sliders className="size-4 text-primary" />
+            <Sliders className="size-4 text-neutral-300" />
             <CardTitle className="text-base font-bold">معلمات الاسترجاع الدلالي (RAG Tuning)</CardTitle>
           </div>
           <CardDescription className="text-xs">
@@ -289,7 +289,7 @@ export function SettingsPanel() {
             <Button
               size="sm"
               onClick={handleSaveRagConfig}
-              className="h-9 px-4 text-xs gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl"
+              className="h-9 px-4 text-xs gap-1.5 bg-white hover:bg-neutral-200 text-black font-bold rounded-lg"
             >
               <Save className="size-3.5" />
               <span>حفظ معلمات الاسترجاع</span>
@@ -322,7 +322,7 @@ export function SettingsPanel() {
                     placeholder="http://localhost:8000"
                     className="font-mono text-xs h-9"
                   />
-                  <Button size="sm" onClick={handleSaveUrl} className="h-9 px-4 text-xs font-bold rounded-xl">
+                  <Button size="sm" onClick={handleSaveUrl} className="h-9 px-4 text-xs font-bold rounded-lg bg-white hover:bg-neutral-200 text-black">
                     حفظ
                   </Button>
                 </div>
